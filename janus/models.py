@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from janus import app
 import tempfile, os
+from werkzeug import generate_password_hash, check_password_hash
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # costly feature that is not used
@@ -13,4 +14,33 @@ class Story(db.Model):
 	def __repr__(self):
 		return '<Story {!r}>'.format(self.id)
 
+# https://gist.github.com/joshfinnie/5cfbe51a80914da1aebe
+class User(db.Model):
+	_id = db.Column(db.Integer, primary_key=True)
+	username = db.Column(db.String(), unique=True, nullable=False)
+	password_hash = db.Column(db.String())
+
+	def __init__(self, password, **kwargs):
+		super(User, self).__init__(**kwargs)
+		self.password_hash = generate_password_hash(password)
+
+	def check_password(self, password):
+		return check_password_hash(self.password_hash, password)
+
+	@property
+	def is_authenticated(self):
+		return True
+
+	@property
+	def is_active(self):
+		return True
+
+	@property
+	def is_anonymous(self):
+		return False
+
+	def get_id(self):
+		return self._id
+
+## Development stuff, to be removed
 db.create_all()

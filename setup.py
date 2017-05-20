@@ -1,1 +1,1 @@
-from janus import app, views, models
+from janus import app, views, models, login_manager
