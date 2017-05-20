@@ -7,7 +7,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # costly feature that is no
 db = SQLAlchemy(app)
 
 class Story(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
+	_id = db.Column(db.Integer, primary_key=True)
 	json = db.Column(db.Text)
 
 	def __repr__(self):

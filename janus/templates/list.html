@@ -3,8 +3,8 @@
 {% block body %}
     <ul>
     	{% for story in stories %}
-    		<li><a href="{{ url_for('play_story', story_id=story.id|e) }}">
-    			{{ story.id|e }}: {{ story.json|e }}
+    		<li><a href="{{ url_for('play_story', story_id=story._id|e) }}">
+    			{{ story._id|e }}: {{ story.json|e }}
     		</a></li>
     	{% endfor %}
     </ul>
