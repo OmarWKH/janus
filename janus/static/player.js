@@ -1,5 +1,6 @@
 function player() {
     // window.addEventListener("load", start);
+    var save = {'last_event': '', 'path': []};
 
     function saveProg(event_id){
         console.log('Saving...');
@@ -8,6 +9,7 @@ function player() {
     }
 
     this.start = function(story_json){
+        console.log("Starting...");
         this.story = JSON.parse(story_json);
         console.log("JSON file parsed...");
         load_event(0);
