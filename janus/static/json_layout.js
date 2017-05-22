@@ -27,9 +27,6 @@ function setEvents(graph) {
 
 function Story(graph) {
     "use strict";
-    this.id = graph.id;
-    this.title = graph.title;
-    this.Author = graph.author;
     this.Events = setEvents(graph);
 }
 

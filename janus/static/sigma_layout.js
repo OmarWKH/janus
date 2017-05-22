@@ -50,9 +50,6 @@ function readEdges(events) {
 
 function SigmaLayout(s) {
     "use strict";
-    this.id = s.Story.id;
-    this.title = s.Story.title;
-    this.author = s.Story.Author;
     this.nodes = readNodes(s.Story.Events);
     this.edges = readEdges(s.Story.Events);
 }
