@@ -75,15 +75,22 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+	if current_user.is_authenticated:
+		return redirect(url_for('list_stories'))
+
 	if request.method == 'POST':
 		username = request.form['username']
 		password = request.form['password'] # should not be passed so plainly
-		user = User.query.filter_by(username=username).first_or_404()
-		valid = user.check_password(password)
-		if valid:
-			login_user(user, remember=False)
-			flash('Logged in')
-			return redirect(url_for('list_stories'))
+		
+		user = User.query.filter_by(username=username).first()
+		if user:
+			valid = user.check_password(password)
+			if valid:
+				login_user(user, remember=False)
+				flash('Logged in')
+				return redirect(url_for('list_stories'))
+
+		flash('Wrong username or password')
 	return render_template('login.html')
 
 @app.route('/logout')
