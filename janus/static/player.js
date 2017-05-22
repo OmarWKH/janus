@@ -1,9 +1,13 @@
-function player() {
-	// window.addEventListener("load", start);
-	
-	this.start = function(story_json){
+function player(story_json, save) {
+	this.init = function(story_json, save){
+		window.addEventListener("load", start);
+		this.story_json = story_json;
+		this.save = save;
+	}
+
+	this.start = function(){
 		 console.log("Starting...");
-		 this.story = JSON.parse(story_json);
+		 this.story = JSON.parse(this.story_json);
 		 console.log("JSON file parsed...");
 		 load_event(0);
 	}
@@ -52,7 +56,7 @@ function player() {
 		 console.log("Story ended at Event: "+id);
 	}
 
-	return this.start;
+	init(story_json, save);
 }
 
 function request_story(id) {
