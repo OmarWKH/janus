@@ -1,8 +1,23 @@
-function player() {
-    // window.addEventListener("load", start);
+function player(story_json, db_save) {
     let save = {'last_event': '', 'path': []};
     let expiration_days = 10;
     let story;
+
+    this.init = function(story_json, db_save){
+        window.addEventListener("load", start);
+
+        console.log("Starting...");
+        this.story_json = story_json;
+        story = JSON.parse(story_json);
+        console.log("JSON file parsed...");
+        console.log(story);
+        
+        // DB save for the requested story is passed to the fucntion, if it exists
+        // this.db_save = db_save;
+        // TO-DO: 
+        // - use db_save if it exists
+        // - save via POST request to /save_checkpoints
+    }
 
     function saveProg(event_id){
         console.log('Saving...');
@@ -55,17 +70,9 @@ function player() {
     }
 
     this.start = function(story_json){
-        console.log("Starting...");
-        story = JSON.parse(story_json);
         let target_event = loadSaveFromCookies();
-        console.log("JSON file parsed...");
-        console.log(story);
         this.load_event(target_event);
     }
-
-
-
-
 
     this.load_event = function(id){
 
@@ -118,8 +125,7 @@ function player() {
         console.log(document.cookie);
     }
 
-
-    return this.start;
+    init(story_json, db_save);
 }
 
 
@@ -129,7 +135,6 @@ function setCookie(cname, cvalue, exdays) {
     let expires = "expires="+ d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
-
 
 function getCookie(cname) {
     let name = cname + "=";
@@ -146,6 +151,7 @@ function getCookie(cname) {
     }
     return "";
 }
+
 
 function request_story(id) {
     let url = window.location.protocol + "//" + window.location.host + "/story_json/" + id;
@@ -168,4 +174,3 @@ function httpGetAsync(url, callback) {
     xmlHttp.open("GET", url, async);
     xmlHttp.send();
 }
-

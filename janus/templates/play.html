@@ -3,7 +3,7 @@
 {% block head %}
     <script type="text/javascript" src="{{ url_for('static', filename='player.js') }}"></script>
     <script type="text/javascript">
-    	request_story({{ story_id }});
+    	player({{ story_json|tojson }}, {{ save|tojson }});
     </script>
 {% endblock %}
 

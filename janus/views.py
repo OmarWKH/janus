@@ -1,12 +1,23 @@
-from flask import render_template, redirect, url_for, request, flash
-from flask_login import login_required, login_user, logout_user
+from flask import render_template, redirect, url_for, request, flash, session
+from flask_login import login_required, login_user, logout_user, current_user
 from janus import app, login_manager
 from janus.models import db, Story, User
+import json
 
 ## Tests
 @app.route('/playtest')
 def playtest():
 	return render_template('playtest.html')
+
+@app.route('/savetest')
+def savetest():
+	return \
+		'''
+		<form method="post" action="save_checkpoints">
+		<input type="text" name="saves" value="{&quot;1&quot;:&quot;1&quot;, &quot;2&quot;:&quot;2&quot;}">
+		<input type="submit" name="submit">
+		</form>
+		'''
 
 ## Main
 @app.route('/list')
@@ -27,7 +38,25 @@ def create_story():
 
 @app.route('/play/<story_id>')
 def play_story(story_id):
-	return render_template('play.html', story_id=story_id)
+	story = Story.query.filter_by(_id=story_id).first_or_404()
+	json = story.json
+
+	story_id = int(story_id)
+	save = None
+	if current_user.is_authenticated and story_id in current_user.saves:
+		save = current_user.saves[story_id]
+
+	return render_template('play.html', story_json=json, save=save)
+
+@app.route('/save_checkpoints', methods=['POST'])
+@login_required
+def save_checkpoints():
+	saves = json.loads(request.values['saves'])
+	current_user.saves.update(saves)
+	db.session.add(current_user)
+	db.session.commit()
+	flash('Saved')
+	return redirect(url_for('list_stories'))
 
 ## API
 @app.route('/story_json/<story_id>')
@@ -42,8 +71,10 @@ def register():
 	if request.method == 'POST':
 		username = request.form['username']
 		password = request.form['password']
+
 		user = User(username=username, password=password)
 		db.session.add(user)
+
 		db.session.commit()
 		flash("Registered")
 		return redirect(url_for('login'))
