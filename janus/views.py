@@ -58,13 +58,6 @@ def save_checkpoints():
 	flash('Saved')
 	return redirect(url_for('list_stories'))
 
-## API
-@app.route('/story_json/<story_id>')
-def story_json(story_id):
-	story = Story.query.filter_by(_id=story_id).first_or_404()
-	json = story.json
-	return json
-
 ## Users
 @app.route('/register', methods=['GET', 'POST'])
 def register():

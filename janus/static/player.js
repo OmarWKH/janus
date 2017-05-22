@@ -152,12 +152,6 @@ function getCookie(cname) {
     return "";
 }
 
-
-function request_story(id) {
-    let url = window.location.protocol + "//" + window.location.host + "/story_json/" + id;
-    httpGetAsync(url, player());
-}
-
 // https://stackoverflow.com/a/4033310
 // alt: fetch https://stackoverflow.com/a/38297729
 function httpGetAsync(url, callback) {
