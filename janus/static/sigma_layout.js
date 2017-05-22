@@ -5,7 +5,7 @@ function Node(i) {
     this.content = "";
 	this.x = 0;
     this.y = 0;
-	this.size = 0;
+	this.size = 3;
 }
 function Edge(j) {
     "use strict";
@@ -13,7 +13,7 @@ function Edge(j) {
     this.choice = "";
     this.source = "";
     this.target = "";
-    this.type = "";
+    this.type = "curvedArrow";
     this.end = false;
 }
 function readNodes(events) {
@@ -24,6 +24,7 @@ function readNodes(events) {
         node.id = 'n' + event.Event_id;
         node.label = event.Event_title;
         node.content = event.Event_Content;
+        node.x = (index / events.length) * (index > events.length ? -1 : 1);
         nodes.push(node);
     });
     return nodes;
