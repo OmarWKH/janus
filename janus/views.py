@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from janus import app, login_manager
-from janus.models import db, Story, User
+from janus.models import db, Story, User, Save
 import json
 
 ## Tests
@@ -39,23 +39,34 @@ def create_story():
 @app.route('/play/<story_id>')
 def play_story(story_id):
 	story = Story.query.filter_by(_id=story_id).first_or_404()
-	json = story.json
 
 	story_id = int(story_id)
 	save = None
 	if current_user.is_authenticated and story_id in current_user.saves:
 		save = current_user.saves[story_id]
 
-	return render_template('play.html', story_json=json, save=save)
+	return render_template('play.html', story=story, save=save)
 
 @app.route('/save_checkpoints', methods=['POST'])
 @login_required
 def save_checkpoints():
+	user = current_user;
 	saves = json.loads(request.values['saves'])
-	current_user.saves.update(saves)
-	db.session.add(current_user)
+	for _id in saves:
+		data = json.dumps(saves[_id]) 
+		story = Story.query.filter_by(_id=_id).first()
+		if story:
+			save = Save.query.filter_by(user=user, story=story).first()
+			if save:
+				save.data = data # update existing
+				flash('New save for story with id {_id} created.')
+			else:
+				user.saves[_id] = data # add new
+				flash('Save for story with id {_id} updated.')
+		else:
+			flash('Save for story with id {_id} could not be saved.')
+	db.session.add(user)
 	db.session.commit()
-	flash('Saved')
 	return redirect(url_for('list_stories'))
 
 ## Users
