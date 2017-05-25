@@ -76,8 +76,7 @@ function player(story_json, db_save) {
 
     this.load_event = function(id){
 
-        let author = story.Story.Author;
-        console.log(author);
+        
         console.log(story.Story.id);
         console.log(id);
         let event_id = story.Story.Events[id].Event_id;
