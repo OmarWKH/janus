@@ -1,9 +1,9 @@
-let save = {'last_event': '', 'path': []};
-let story;
-function player(story_json, db_save) {
+var save = {'last_event': '', 'path': []};
+var story;
+function player(story_id, story_json, db_save) {
     let expiration_days = 10;
 
-    this.init = function(story_json, db_save){
+    this.init = function(story_id, story_json, db_save){
         window.addEventListener("load", start);
         console.log("DB Save:");
         console.log(db_save);
@@ -11,6 +11,7 @@ function player(story_json, db_save) {
         console.log("Starting...");
         this.story_json = story_json;
         story = JSON.parse(story_json);
+        story.id = story_id
         console.log("JSON file parsed...");
         console.log(story);
         
@@ -31,7 +32,7 @@ function player(story_json, db_save) {
     function loadFromDB(){
         console.log(db_save);
         if(db_save !== null){
-            save = db_save;
+            save = JSON.parse(db_save);
             return save['last_event'];
         }else{
             return 0;
@@ -61,13 +62,13 @@ function player(story_json, db_save) {
         let saves = getCookie("saves");
         if( saves !== ''){
             saves_json = JSON.parse(saves);
-            let storyID = story.Story.id;
-            if( saves_json.hasOwnProperty(story.Story.id)) {
+            let storyID = story.id;
+            if( saves_json.hasOwnProperty(storyID)) {
                 console.log(save);
                 let load = confirm('We Detected an old save, do you want to load it?, Note: Canceling will overwrite the save');
                 if(load) {
-                    console.log(saves_json[story.Story.id]);
-                    save = saves_json[story.Story.id];
+                    console.log(saves_json[storyID]);
+                    save = saves_json[storyID];
                     console.log('Loading....');
                     console.log(save['last_event']);
                     return save['last_event'];
@@ -89,11 +90,11 @@ function player(story_json, db_save) {
         if(saves_cookie !== '') {
             saves_json = JSON.parse(getCookie("saves"));
             console.log(saves_json);
-            saves_json[story.Story.id] = save;
+            saves_json[story.id] = save;
 
             setCookie("saves",JSON.stringify(saves_json),expiration_days);
         }else {
-            let story_id = story.Story.id;
+            let story_id = story.id;
             saves_json[story_id] =  save;
             setCookie("saves",JSON.stringify(saves_json),expiration_days);
         }
@@ -107,8 +108,8 @@ function player(story_json, db_save) {
     }
 
     this.load_event = function(id){
-        console.log(story.Story.id);
-        console.log(id);
+        console.log("story id: " + story.id);
+        console.log("event id: " + id);
         let event_id = story.Story.Events[id].Event_id;
         let event_title = story.Story.Events[id].Event_title;
         saveProg(event_id);
@@ -169,7 +170,7 @@ function player(story_json, db_save) {
         save = nsave;
     }
 
-    init(story_json, db_save);
+    init(story_id, story_json, db_save);
 }
 
 
@@ -200,7 +201,7 @@ function saveToDB(){
     let saves_cookie = getCookie("saves");
     let saves_json = {};
     saves_json = JSON.parse(saves_cookie);
-    saves_json[story.Story.id] = save;
+    saves_json[story.id] = save;
     let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
     let params = "saves="+JSON.stringify(saves_json);
     console.log(params);
