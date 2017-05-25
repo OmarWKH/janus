@@ -29,9 +29,12 @@ function player(story_json, db_save) {
     }
 
     function loadFromDB(){
+        console.log(db_save);
         if(db_save !== null){
             save = db_save;
             return save['last_event'];
+        }else{
+            return 0;
         }
     }
 
@@ -61,7 +64,7 @@ function player(story_json, db_save) {
             let storyID = story.Story.id;
             if( saves_json.hasOwnProperty(story.Story.id)) {
                 console.log(save);
-                let load = confirm('We Detected an old save, do you want to load it?');
+                let load = confirm('We Detected an old save, do you want to load it?, Note: Canceling will overwrite the save');
                 if(load) {
                     console.log(saves_json[story.Story.id]);
                     save = saves_json[story.Story.id];
@@ -98,7 +101,8 @@ function player(story_json, db_save) {
     }
 
     this.start = function(story_json){
-        let target_event = loadSaveFromCookies();
+        // let target_event = loadSaveFromCookies();
+        let target_event = loadFromDB();
         this.load_event(target_event);
     }
 
@@ -198,8 +202,9 @@ function saveToDB(){
     saves_json = JSON.parse(saves_cookie);
     saves_json[story.Story.id] = save;
     let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
-    let params = JSON.stringify(saves_json);
-    httpPostAsync(url, params, callbackFunction());
+    let params = "saves="+JSON.stringify(saves_json);
+    console.log(params);
+    httpPostAsync(url, params, callbackFunction);
 }
 
 // https://stackoverflow.com/a/4033310
@@ -219,7 +224,7 @@ function httpGetAsync(url, callback) {
     xmlHttp.send();
 }
 
-function httpPostAsync(url, params, callback = callbackFunction) {
+function httpPostAsync(url, params, callback) {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         const done = 4;
@@ -230,8 +235,13 @@ function httpPostAsync(url, params, callback = callbackFunction) {
     }
     let async = true;
     console.log(url);
+
     xmlHttp.open("POST", url, async);
+    console.log("Connection Opened");
+    xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    console.log("RequestHeader Set.");
     xmlHttp.send(params);
+    console.log("Request Sent.");
 }
 
 function callbackFunction(httpResponse){
