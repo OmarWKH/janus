@@ -5,9 +5,11 @@
     <script type="text/javascript">
     	player({{ story_json|tojson }}, {{ save|tojson }});
     </script>
+    <script type="text/javascript" src="../static/player.js"></script>
 {% endblock %}
 
 {% block body %}
+    <div id="Story_control"><button name="save" onClick="saveToDB()">Save</button><button name="load" onClick="">Load</button></div>
     <div id="E_data">
     </div>
     <div id="E_text">
