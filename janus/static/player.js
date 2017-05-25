@@ -1,10 +1,12 @@
+let save = {'last_event': '', 'path': []};
+let story;
 function player(story_json, db_save) {
-    let save = {'last_event': '', 'path': []};
     let expiration_days = 10;
-    let story;
 
     this.init = function(story_json, db_save){
         window.addEventListener("load", start);
+        console.log("DB Save:");
+        console.log(db_save);
 
         console.log("Starting...");
         this.story_json = story_json;
@@ -12,7 +14,7 @@ function player(story_json, db_save) {
         console.log("JSON file parsed...");
         console.log(story);
         
-        // DB save for the requested story is passed to the fucntion, if it exists
+        // DB save for the requested story is passed to the function, if it exists
         // this.db_save = db_save;
         // TO-DO: 
         // - use db_save if it exists
@@ -25,6 +27,32 @@ function player(story_json, db_save) {
         save.path.push(event_id);
         saveProgViaCookies();
     }
+
+    function loadFromDB(){
+        if(db_save !== null){
+            save = db_save;
+            return save['last_event'];
+        }
+    }
+
+//     function saveToDB(){
+//         let http = new XMLHttpRequest();
+//         let saves_json = JSON.parse(saves);
+//         saves_json.story.Story.id = save;
+//         let url = "/save_checkpoints";
+//         let params = JSON.stringify(saves_json);
+//         http.open("POST", url, true);
+//
+// //Send the proper header information along with the request
+//         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+//
+//         http.onreadystatechange = function() {//Call a function when the state changes.
+//             if(http.readyState == 4 && http.status == 200) {
+//                 alert(http.responseText);
+//             }
+//         }
+//         http.send(params);
+//     }
 
     function loadSaveFromCookies(){
         let saves = getCookie("saves");
@@ -75,8 +103,6 @@ function player(story_json, db_save) {
     }
 
     this.load_event = function(id){
-
-        
         console.log(story.Story.id);
         console.log(id);
         let event_id = story.Story.Events[id].Event_id;
@@ -124,6 +150,21 @@ function player(story_json, db_save) {
         console.log(document.cookie);
     }
 
+    function  getSaves(){
+        return saves;
+    }
+    function setSaves(nsaves){
+        saves = nsaves;
+    }
+
+    function getSave(){
+        return save;
+    }
+
+    function setSave(nsave){
+        save = nsave;
+    }
+
     init(story_json, db_save);
 }
 
@@ -151,6 +192,16 @@ function getCookie(cname) {
     return "";
 }
 
+function saveToDB(){
+    let saves_cookie = getCookie("saves");
+    let saves_json = {};
+    saves_json = JSON.parse(saves_cookie);
+    saves_json[story.Story.id] = save;
+    let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
+    let params = JSON.stringify(saves_json);
+    httpPostAsync(url, params, callbackFunction());
+}
+
 // https://stackoverflow.com/a/4033310
 // alt: fetch https://stackoverflow.com/a/38297729
 function httpGetAsync(url, callback) {
@@ -166,4 +217,24 @@ function httpGetAsync(url, callback) {
     console.log(url);
     xmlHttp.open("GET", url, async);
     xmlHttp.send();
+}
+
+function httpPostAsync(url, params, callback = callbackFunction) {
+    let xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        const done = 4;
+        const ok = 200;
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            callback(xmlHttp.responseText);
+        }
+    }
+    let async = true;
+    console.log(url);
+    xmlHttp.open("POST", url, async);
+    xmlHttp.send(params);
+}
+
+function callbackFunction(httpResponse){
+    console.log("Callback:");
+    console.log(httpResponse);
 }
