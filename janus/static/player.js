@@ -1,4 +1,4 @@
-var save = {'last_event': '', 'path': []};
+var save = {'last_event': '', 'path': [], 'created_at':{}};
 var story;
 function player(story_id, story_json, db_save) {
     let expiration_days = 10;
@@ -26,37 +26,64 @@ function player(story_id, story_json, db_save) {
         console.log('Saving...');
         save.last_event = event_id;
         save.path.push(event_id);
+        save['created_at'] = new Date().getTime();
+        console.log(save);
         saveProgViaCookies();
     }
 
     function loadFromDB(){
         console.log(db_save);
         if(db_save !== null){
-            save = JSON.parse(db_save);
-            return save['last_event'];
+            let load = confirm("DB Load?");
+            if(load) {
+                save = JSON.parse(db_save);
+                return save['last_event'];
+            }else{
+                return 0;
+            }
         }else{
             return 0;
         }
     }
 
-//     function saveToDB(){
-//         let http = new XMLHttpRequest();
-//         let saves_json = JSON.parse(saves);
-//         saves_json.story.Story.id = save;
-//         let url = "/save_checkpoints";
-//         let params = JSON.stringify(saves_json);
-//         http.open("POST", url, true);
-//
-// //Send the proper header information along with the request
-//         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-//
-//         http.onreadystatechange = function() {//Call a function when the state changes.
-//             if(http.readyState == 4 && http.status == 200) {
-//                 alert(http.responseText);
-//             }
-//         }
-//         http.send(params);
-//     }
+    function checkSaveFile(cookie_save, db_save_string){
+        let load;
+        if( cookie_save !== null && db_save !== null) {
+            let db_save = JSON.parse(db_save_string);
+            console.log(cookie_save);
+            console.log(db_save);
+            if(cookie_save.hasOwnProperty('created_at') && db_save.hasOwnProperty('created_at')) {
+                let newest = cookie_save['created_at'] - db_save['created_at'];
+                console.log("Newest: "+newest);
+                if (newest <= 0 || cookie_save == null) {
+                    console.log("Loading From DB....Default");
+                    console.log(db_save["created_at"]);
+                    load = loadFromDB();
+                } else {
+                    console.log("Loading From Cookies...Default");
+                    console.log(cookie_save["created_at"]);
+                    load = loadSaveFromCookies();
+                    saveToDB();
+                }
+                return load;
+            }else{
+                console.log("Missing creation time!, loading Cookie save");
+                console.log(cookie_save['created_at']);
+                console.log(db_save['created_at']);
+                load = loadSaveFromCookies();
+                return load;
+            }
+        }else
+            if(cookie_save !== null) {
+                console.log("Loading From Cookies...No DB_save");
+                load = loadSaveFromCookies();
+                saveToDB();
+            }else if(db_save !== null){
+                console.log("Loading from DB...No Cookie_Save");
+                load = loadFromDB();
+            }
+            return load;
+    }
 
     function loadSaveFromCookies(){
         let saves = getCookie("saves");
@@ -83,6 +110,26 @@ function player(story_id, story_json, db_save) {
             return 0
     }
 
+    function getSaveFromCookies(){
+        let saves = getCookie("saves");
+        if( saves !== ''){
+            saves_json = JSON.parse(saves);
+            let storyID = story.id;
+            if( saves_json.hasOwnProperty(storyID)) {
+                console.log(saves_json[storyID]);
+                let save_cookie = saves_json[storyID];
+                console.log('Checking Old Save from Cookies....');
+                console.log(save_cookie);
+                return save_cookie;
+            }else{
+                return {};
+            }
+
+        }else {
+            return {};
+        }
+    }
+
     function saveProgViaCookies(){
 
         let saves_cookie = getCookie("saves");
@@ -103,7 +150,11 @@ function player(story_id, story_json, db_save) {
 
     this.start = function(story_json){
         // let target_event = loadSaveFromCookies();
-        let target_event = loadFromDB();
+        // let target_event = loadFromDB();
+        let cookie_save = getSaveFromCookies();
+        console.log("Cookie Save:");
+        console.log(cookie_save);
+        let target_event = checkSaveFile(cookie_save,db_save);
         this.load_event(target_event);
     }
 
@@ -202,7 +253,7 @@ function getCookie(cname) {
 function saveToDB(){
     let saves_cookie = getCookie("saves");
     let saves_json = {};
-    saves_json = JSON.parse(saves_cookie);
+    saves_json = saves_cookie !== ''? JSON.parse(saves_cookie): {};
     saves_json[story.id] = save;
     let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
     let params = "saves="+JSON.stringify(saves_json);
