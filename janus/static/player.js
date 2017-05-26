@@ -128,6 +128,8 @@ function player(story_id, story_json, db_save) {
             console.log(branches[i]);
             choice(branches[i]);
         }
+
+        clearFeedback();
     }
 
     this.choice = function(branch){
@@ -205,7 +207,7 @@ function saveToDB(){
     let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
     let params = "saves="+JSON.stringify(saves_json);
     console.log(params);
-    httpPostAsync(url, params, callbackFunction);
+    httpPostAsync(url, params, saveFeedbackCallback);
 }
 
 // https://stackoverflow.com/a/4033310
@@ -229,9 +231,8 @@ function httpPostAsync(url, params, callback) {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         const done = 4;
-        const ok = 200;
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            callback(xmlHttp.responseText);
+        if (xmlHttp.readyState == 4) {
+            callback(xmlHttp.status, xmlHttp.responseText);
         }
     }
     let async = true;
@@ -245,7 +246,37 @@ function httpPostAsync(url, params, callback) {
     console.log("Request Sent.");
 }
 
-function callbackFunction(httpResponse){
+function saveFeedbackCallback(status, httpResponse){
+    let forbidden_status = 403;
+    let create_status = 201;
+    let feedback = "";
+
+    switch (status) {
+        case forbidden_status: // when user is not logged in
+            feedback = "Forbidden: " + httpResponse;
+            break;
+        case create_status: // when user is logged in, httpResponse is json, each story id and its save status (created/updated/ignored)
+            feedback = "Create: " + httpResponse;
+            break;
+        default: // unknown, shouldn't happen
+            feedback = "Status|Response: " + status + " | " + httpResponse;
+    }
+
+    addFeedback(feedback);
+}
+
+function addFeedback(feedback) {
+    let container = document.getElementById("Save_feedback");
+    feedbackHTML = "<li>"+feedback+"</li>";
+    container.innerHTML += feedbackHTML;
+}
+
+function clearFeedback() {
+    document.getElementById("Save_feedback").innerHTML = "";
+}
+
+function callbackFunction(status, httpResponse){
     console.log("Callback:");
+    console.log("Status " + status);
     console.log(httpResponse);
 }

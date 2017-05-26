@@ -54,7 +54,7 @@ def save_checkpoints():
 
 	if not user.is_authenticated:
 		body = 'Login required'
-		forbidden_status = 403 # https://httpstatuses.com/401
+		forbidden_status = 403 # https://httpstatuses.com/403
 		return (body, forbidden_status)
 
 	feedback = dict();
