@@ -76,7 +76,8 @@ def save_checkpoints():
 	db.session.commit()
 	
 	created_status = 201 # https://httpstatuses.com/201
-	return (json.dumps(feedback), created_status)
+	header = {'Content-Type': 'application/json'}
+	return (json.dumps(feedback), created_status, header)
 
 ## Users
 @app.route('/register', methods=['GET', 'POST'])
