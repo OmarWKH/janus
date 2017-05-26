@@ -48,9 +48,16 @@ def play_story(story_id):
 	return render_template('play.html', story=story, save=save)
 
 @app.route('/save_checkpoints', methods=['POST'])
-@login_required
+# @login_required, but don't want a redirect to /login
 def save_checkpoints():
 	user = current_user;
+
+	if not user.is_authenticated:
+		body = 'Login required'
+		forbidden_status = 403 # https://httpstatuses.com/401
+		return (body, forbidden_status)
+
+	feedback = dict();
 	saves = json.loads(request.values['saves'])
 	for _id in saves:
 		data = json.dumps(saves[_id]) 
@@ -59,15 +66,17 @@ def save_checkpoints():
 			save = Save.query.filter_by(user=user, story=story).first()
 			if save:
 				save.data = data # update existing
-				flash('New save for story with id {_id} created.')
+				feedback[_id] = 'updated'
 			else:
 				user.saves[_id] = data # add new
-				flash('Save for story with id {_id} updated.')
+				feedback[_id] = 'created'
 		else:
-			flash('Save for story with id {_id} could not be saved.')
+			feedback[_id] = 'ignored'
 	db.session.add(user)
 	db.session.commit()
-	return redirect(url_for('list_stories'))
+	
+	created_status = 201 # https://httpstatuses.com/201
+	return (json.dumps(feedback), created_status)
 
 ## Users
 @app.route('/register', methods=['GET', 'POST'])
