@@ -34,7 +34,7 @@ function player(story_id, story_json, db_save) {
     function loadFromDB(){
         console.log(db_save);
         if(db_save !== null){
-            let load = confirm("DB Load?");
+            let load = confirm("We Detected an old save in our Database, do you want to load it?, Note: Canceling will overwrite the save");
             if(load) {
                 save = JSON.parse(db_save);
                 return save['last_event'];
@@ -92,7 +92,7 @@ function player(story_id, story_json, db_save) {
             let storyID = story.id;
             if( saves_json.hasOwnProperty(storyID)) {
                 console.log(save);
-                let load = confirm('We Detected an old save, do you want to load it?, Note: Canceling will overwrite the save');
+                let load = confirm('We Detected an old save in your cookies, do you want to load it?, Note: Canceling will overwrite the save');
                 if(load) {
                     console.log(saves_json[storyID]);
                     save = saves_json[storyID];
