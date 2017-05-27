@@ -63,7 +63,7 @@ function player(story_id, story_json, db_save) {
                     console.log("Loading From Cookies...Default");
                     console.log(cookie_save["created_at"]);
                     load = loadSaveFromCookies();
-                    saveToDB();
+                    saveToDB(story_id);
                 }
                 return load;
             }else{
@@ -77,7 +77,7 @@ function player(story_id, story_json, db_save) {
             if(cookie_save !== null) {
                 console.log("Loading From Cookies...No DB_save");
                 load = loadSaveFromCookies();
-                saveToDB();
+                saveToDB(story_id);
             }else if(db_save !== null){
                 console.log("Loading from DB...No Cookie_Save");
                 load = loadFromDB();
@@ -148,7 +148,7 @@ function player(story_id, story_json, db_save) {
 
     }
 
-    document.addEventListener("onunload",saveToDBOnUnload(story_json));
+    document.addEventListener("onunload",saveToDB(story_id));
 
     this.start = function(story_json){
         // let target_event = loadSaveFromCookies();
@@ -260,24 +260,24 @@ function deleteCookieSave(story_id) {
 }
 
 
-function saveToDB(){
-    let saves_cookie = getCookie("saves");
-    let saves_json = {};
-    saves_json = saves_cookie !== ''? JSON.parse(saves_cookie): {};
-    saves_json[story.id] = save;
-    let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
-    let params = "saves="+JSON.stringify(saves_json);
-    console.log(params);
-    httpPostAsync(url, params, saveFeedbackCallback);
-}
+// function saveToDB(){
+//     let saves_cookie = getCookie("saves");
+//     let saves_json = {};
+//     saves_json = saves_cookie !== ''? JSON.parse(saves_cookie): {};
+//     saves_json[story.id] = save;
+//     let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
+//     let params = "saves="+JSON.stringify(saves_json);
+//     console.log(params);
+//     httpPostAsync(url, params, saveFeedbackCallback);
+// }
 
-function saveToDBOnUnload(story){
+function saveToDB(story_id){
     console.log("Event Listener");
-    console.log(story);
+    console.log(story_id);
     let saves_cookie = getCookie("saves");
     let saves_json = {};
     saves_json = saves_cookie !== ''? JSON.parse(saves_cookie): {};
-    saves_json[story.id] = save;
+    saves_json[story_id] = save;
     let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
     let params = "saves="+JSON.stringify(saves_json);
     console.log(params);
