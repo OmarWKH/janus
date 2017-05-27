@@ -327,7 +327,12 @@ function saveFeedbackCallback(status, httpResponse){
 
     switch (status) {
         case forbidden_status: // when user is not logged in
-            feedback = "Forbidden: " + httpResponse;
+            login_link = window.location.protocol + "//" + window.location.host + "/login";
+            register_link = window.location.protocol + "//" + window.location.host + "/register";
+            login = "<a href='"+ login_link + "'>login</a>";
+            register = "<a href='" + register_link + "'>register</a>";
+            feedback = "Your saves are stored locally in cookies that will eventually expire. \
+            If you want to allow us to store them permanently " + login + " or " + register + ".";
             break;
         case create_status: // when user is logged in, httpResponse is json, each story id and its save status (created/updated/ignored)
             feedback = "Create: " + httpResponse;
@@ -343,6 +348,7 @@ function saveFeedbackCallback(status, httpResponse){
                         updated++; break;
                     default: break;
                 }
+                feedback = "We created " + created + " saves, updated " + updated + " saves, and removed " + removed + " invalid saves.";
             });
             break;
         default: // unknown, shouldn't happen
