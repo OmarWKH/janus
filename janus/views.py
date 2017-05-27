@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from janus import app, login_manager
-from janus.models import db, Story, User
+from janus.models import db, Story, User, Save
 import json
 
 ## Tests
@@ -39,24 +39,45 @@ def create_story():
 @app.route('/play/<story_id>')
 def play_story(story_id):
 	story = Story.query.filter_by(_id=story_id).first_or_404()
-	json = story.json
 
 	story_id = int(story_id)
 	save = None
 	if current_user.is_authenticated and story_id in current_user.saves:
 		save = current_user.saves[story_id]
 
-	return render_template('play.html', story_json=json, save=save)
+	return render_template('play.html', story=story, save=save)
 
 @app.route('/save_checkpoints', methods=['POST'])
-@login_required
+# @login_required, but don't want a redirect to /login
 def save_checkpoints():
+	user = current_user;
+
+	if not user.is_authenticated:
+		body = 'Login required'
+		forbidden_status = 403 # https://httpstatuses.com/403
+		return (body, forbidden_status)
+
+	feedback = dict();
 	saves = json.loads(request.values['saves'])
-	current_user.saves.update(saves)
-	db.session.add(current_user)
+	for _id in saves:
+		data = json.dumps(saves[_id]) 
+		story = Story.query.filter_by(_id=_id).first()
+		if story:
+			save = Save.query.filter_by(user=user, story=story).first()
+			if save:
+				save.data = data # update existing
+				feedback[_id] = 'updated'
+			else:
+				user.saves[_id] = data # add new
+				feedback[_id] = 'created'
+		else:
+			feedback[_id] = 'ignored'
+	db.session.add(user)
 	db.session.commit()
-	flash('Saved')
-	return redirect(url_for('list_stories'))
+	
+	created_status = 201 # https://httpstatuses.com/201
+	header = {'Content-Type': 'application/json'}
+	return (json.dumps(feedback), created_status, header)
 
 ## Users
 @app.route('/register', methods=['GET', 'POST'])

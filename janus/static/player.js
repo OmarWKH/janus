@@ -1,42 +1,96 @@
-function player(story_json, db_save) {
-    let save = {'last_event': '', 'path': []};
+let save = {'last_event': '', 'path': [], 'created_at':{}};
+let story;
+function player(story_id, story_json, db_save) {
     let expiration_days = 10;
-    let story;
 
-    this.init = function(story_json, db_save){
+    this.init = function(story_id, story_json, db_save){
         window.addEventListener("load", start);
+        window.addEventListener("unload", function(){saveToDB(story_id);});
+        console.log("DB Save:");
+        console.log(db_save);
 
         console.log("Starting...");
         this.story_json = story_json;
         story = JSON.parse(story_json);
+        story.id = story_id
         console.log("JSON file parsed...");
         console.log(story);
-        
-        // DB save for the requested story is passed to the fucntion, if it exists
-        // this.db_save = db_save;
-        // TO-DO: 
-        // - use db_save if it exists
-        // - save via POST request to /save_checkpoints
     }
 
     function saveProg(event_id){
         console.log('Saving...');
         save.last_event = event_id;
         save.path.push(event_id);
+        save['created_at'] = new Date().getTime();
+        console.log(save);
         saveProgViaCookies();
+    }
+
+    function loadFromDB(){
+        console.log(db_save);
+        if(db_save !== null){
+            let load = confirm("We Detected an old save in our Database, do you want to load it?, Note: Canceling will overwrite the save");
+            if(load) {
+                save = JSON.parse(db_save);
+                return save['last_event'];
+            }else{
+                return 0;
+            }
+        }else{
+            return 0;
+        }
+    }
+
+    function checkSaveFile(cookie_save, db_save_string){
+        let load;
+        if( cookie_save !== null && db_save !== null) {
+            let db_save = JSON.parse(db_save_string);
+            console.log(cookie_save);
+            console.log(db_save);
+            if(cookie_save.hasOwnProperty('created_at') && db_save.hasOwnProperty('created_at')) {
+                let newest = cookie_save['created_at'] - db_save['created_at'];
+                console.log("Newest: "+newest);
+                if (newest <= 0 || cookie_save == null) {
+                    console.log("Loading From DB....Default");
+                    console.log(db_save["created_at"]);
+                    load = loadFromDB();
+                } else {
+                    console.log("Loading From Cookies...Default");
+                    console.log(cookie_save["created_at"]);
+                    load = loadSaveFromCookies();
+                    saveToDB(story_id);
+                }
+                return load;
+            }else{
+                console.log("Missing creation time!, loading Cookie save");
+                console.log(cookie_save['created_at']);
+                console.log(db_save['created_at']);
+                load = loadSaveFromCookies();
+                return load;
+            }
+        }else
+            if(cookie_save !== null) {
+                console.log("Loading From Cookies...No DB_save");
+                load = loadSaveFromCookies();
+                saveToDB(story_id);
+            }else if(db_save !== null){
+                console.log("Loading from DB...No Cookie_Save");
+                load = loadFromDB();
+            }
+            return load;
     }
 
     function loadSaveFromCookies(){
         let saves = getCookie("saves");
         if( saves !== ''){
             saves_json = JSON.parse(saves);
-            let storyID = story.Story.id;
-            if( saves_json.hasOwnProperty(story.Story.id)) {
+            let storyID = story.id;
+            if( saves_json.hasOwnProperty(storyID)) {
                 console.log(save);
-                let load = confirm('We Detected an old save, do you want to load it?');
+                let load = confirm('We Detected an old save in your Cookies, do you want to load it?, Note: Canceling will overwrite the save');
                 if(load) {
-                    console.log(saves_json[story.Story.id]);
-                    save = saves_json[story.Story.id];
+                    console.log(saves_json[storyID]);
+                    save = saves_json[storyID];
                     console.log('Loading....');
                     console.log(save['last_event']);
                     return save['last_event'];
@@ -51,6 +105,26 @@ function player(story_json, db_save) {
             return 0
     }
 
+    function getSaveFromCookies(){
+        let saves = getCookie("saves");
+        if( saves !== ''){
+            saves_json = JSON.parse(saves);
+            let storyID = story.id;
+            if( saves_json.hasOwnProperty(storyID)) {
+                console.log(saves_json[storyID]);
+                let save_cookie = saves_json[storyID];
+                console.log('Checking Old Save from Cookies....');
+                console.log(save_cookie);
+                return save_cookie;
+            }else{
+                return {};
+            }
+
+        }else {
+            return {};
+        }
+    }
+
     function saveProgViaCookies(){
 
         let saves_cookie = getCookie("saves");
@@ -58,11 +132,11 @@ function player(story_json, db_save) {
         if(saves_cookie !== '') {
             saves_json = JSON.parse(getCookie("saves"));
             console.log(saves_json);
-            saves_json[story.Story.id] = save;
+            saves_json[story.id] = save;
 
             setCookie("saves",JSON.stringify(saves_json),expiration_days);
         }else {
-            let story_id = story.Story.id;
+            let story_id = story.id;
             saves_json[story_id] =  save;
             setCookie("saves",JSON.stringify(saves_json),expiration_days);
         }
@@ -70,15 +144,18 @@ function player(story_json, db_save) {
     }
 
     this.start = function(story_json){
-        let target_event = loadSaveFromCookies();
+        // let target_event = loadSaveFromCookies();
+        // let target_event = loadFromDB();
+        let cookie_save = getSaveFromCookies();
+        console.log("Cookie Save:");
+        console.log(cookie_save);
+        let target_event = checkSaveFile(cookie_save,db_save);
         this.load_event(target_event);
     }
 
     this.load_event = function(id){
-
-        
-        console.log(story.Story.id);
-        console.log(id);
+        console.log("story id: " + story.id);
+        console.log("event id: " + id);
         let event_id = story.Story.Events[id].Event_id;
         let event_title = story.Story.Events[id].Event_title;
         saveProg(event_id);
@@ -97,6 +174,8 @@ function player(story_json, db_save) {
             console.log(branches[i]);
             choice(branches[i]);
         }
+
+        clearFeedback();
     }
 
     this.choice = function(branch){
@@ -124,7 +203,22 @@ function player(story_json, db_save) {
         console.log(document.cookie);
     }
 
-    init(story_json, db_save);
+    function  getSaves(){
+        return saves;
+    }
+    function setSaves(nsaves){
+        saves = nsaves;
+    }
+
+    function getSave(){
+        return save;
+    }
+
+    function setSave(nsave){
+        save = nsave;
+    }
+
+    init(story_id, story_json, db_save);
 }
 
 
@@ -151,6 +245,38 @@ function getCookie(cname) {
     return "";
 }
 
+function deleteCookieSave(story_id) {
+    console.log("Deleting save for " + story_id);
+    saves_json = JSON.parse(getCookie("saves"));
+    delete saves_json[story_id];
+    setCookie("saves",JSON.stringify(saves_json),player.expiration_days);
+}
+
+
+// function saveToDB(){
+//     let saves_cookie = getCookie("saves");
+//     let saves_json = {};
+//     saves_json = saves_cookie !== ''? JSON.parse(saves_cookie): {};
+//     saves_json[story.id] = save;
+//     let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
+//     let params = "saves="+JSON.stringify(saves_json);
+//     console.log(params);
+//     httpPostAsync(url, params, saveFeedbackCallback);
+// }
+
+function saveToDB(story_id){
+    console.log("Event Listener");
+    console.log(story_id);
+    let saves_cookie = getCookie("saves");
+    let saves_json = {};
+    saves_json = saves_cookie !== ''? JSON.parse(saves_cookie): {};
+    saves_json[story_id] = save;
+    let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
+    let params = "saves="+JSON.stringify(saves_json);
+    console.log(params);
+    httpPostAsync(url, params, saveFeedbackCallback);
+}
+
 // https://stackoverflow.com/a/4033310
 // alt: fetch https://stackoverflow.com/a/38297729
 function httpGetAsync(url, callback) {
@@ -166,4 +292,77 @@ function httpGetAsync(url, callback) {
     console.log(url);
     xmlHttp.open("GET", url, async);
     xmlHttp.send();
+}
+
+function httpPostAsync(url, params, callback) {
+    let xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        const done = 4;
+        if (xmlHttp.readyState == 4) {
+            callback(xmlHttp.status, xmlHttp.responseText);
+        }
+    }
+    let async = true;
+    console.log(url);
+
+    xmlHttp.open("POST", url, async);
+    console.log("Connection Opened");
+    xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    console.log("RequestHeader Set.");
+    xmlHttp.send(params);
+    console.log("Request Sent.");
+}
+
+function saveFeedbackCallback(status, httpResponse){
+    let forbidden_status = 403;
+    let create_status = 201;
+    let feedback = "";
+
+    switch (status) {
+        case forbidden_status: // when user is not logged in
+            login_link = window.location.protocol + "//" + window.location.host + "/login";
+            register_link = window.location.protocol + "//" + window.location.host + "/register";
+            login = "<a href='"+ login_link + "'>login</a>";
+            register = "<a href='" + register_link + "'>register</a>";
+            feedback = "Your saves are stored locally in cookies that will eventually expire. \
+            If you want to allow us to store them permanently " + login + " or " + register + ".";
+            break;
+        case create_status: // when user is logged in, httpResponse is json, each story id and its save status (created/updated/ignored)
+            feedback = "Create: " + httpResponse;
+            created = updated = removed = 0;
+            JSON.parse(httpResponse, (story_id, state) => {
+                switch (state) {
+                    case "ignored":
+                        deleteCookieSave(story_id);
+                        removed++; break;
+                    case "created":
+                        created++; break;
+                    case "updated":
+                        updated++; break;
+                    default: break;
+                }
+                feedback = "We created " + created + " saves, updated " + updated + " saves, and removed " + removed + " invalid saves.";
+            });
+            break;
+        default: // unknown, shouldn't happen
+            feedback = "Status|Response: " + status + " | " + httpResponse;
+    }
+
+    addFeedback(feedback);
+}
+
+function addFeedback(feedback) {
+    let container = document.getElementById("Save_feedback");
+    feedbackHTML = "<li>"+feedback+"</li>";
+    container.innerHTML += feedbackHTML;
+}
+
+function clearFeedback() {
+    document.getElementById("Save_feedback").innerHTML = "";
+}
+
+function callbackFunction(status, httpResponse){
+    console.log("Callback:");
+    console.log("Status " + status);
+    console.log(httpResponse);
 }
