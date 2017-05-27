@@ -5,6 +5,7 @@ function player(story_id, story_json, db_save) {
 
     this.init = function(story_id, story_json, db_save){
         window.addEventListener("load", start);
+        window.addEventListener("unload", function(){saveToDB(story_id);});
         console.log("DB Save:");
         console.log(db_save);
 
@@ -14,12 +15,6 @@ function player(story_id, story_json, db_save) {
         story.id = story_id
         console.log("JSON file parsed...");
         console.log(story);
-        
-        // DB save for the requested story is passed to the function, if it exists
-        // this.db_save = db_save;
-        // TO-DO: 
-        // - use db_save if it exists
-        // - save via POST request to /save_checkpoints
     }
 
     function saveProg(event_id){
@@ -147,8 +142,6 @@ function player(story_id, story_json, db_save) {
         }
 
     }
-
-    document.addEventListener("onunload",saveToDB(story_id));
 
     this.start = function(story_json){
         // let target_event = loadSaveFromCookies();
