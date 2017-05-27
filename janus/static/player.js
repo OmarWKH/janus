@@ -1,5 +1,5 @@
-var save = {'last_event': '', 'path': [], 'created_at':{}};
-var story;
+let save = {'last_event': '', 'path': [], 'created_at':{}};
+let story;
 function player(story_id, story_json, db_save) {
     let expiration_days = 10;
 
@@ -34,7 +34,7 @@ function player(story_id, story_json, db_save) {
     function loadFromDB(){
         console.log(db_save);
         if(db_save !== null){
-            let load = confirm("We Detected an old save in our Database, do you want to load it?, Note: Canceling will overwrite the save");
+            let load = confirm("DB Load?");
             if(load) {
                 save = JSON.parse(db_save);
                 return save['last_event'];
@@ -92,7 +92,7 @@ function player(story_id, story_json, db_save) {
             let storyID = story.id;
             if( saves_json.hasOwnProperty(storyID)) {
                 console.log(save);
-                let load = confirm('We Detected an old save in your cookies, do you want to load it?, Note: Canceling will overwrite the save');
+                let load = confirm('We Detected an old save, do you want to load it?, Note: Canceling will overwrite the save');
                 if(load) {
                     console.log(saves_json[storyID]);
                     save = saves_json[storyID];
@@ -147,6 +147,8 @@ function player(story_id, story_json, db_save) {
         }
 
     }
+
+    document.addEventListener("onunload",saveToDB2(story_json));
 
     this.start = function(story_json){
         // let target_event = loadSaveFromCookies();
@@ -250,7 +252,22 @@ function getCookie(cname) {
     return "";
 }
 
+
+
 function saveToDB(){
+    let saves_cookie = getCookie("saves");
+    let saves_json = {};
+    saves_json = saves_cookie !== ''? JSON.parse(saves_cookie): {};
+    saves_json[story.id] = save;
+    let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints";
+    let params = "saves="+JSON.stringify(saves_json);
+    console.log(params);
+    httpPostAsync(url, params, saveFeedbackCallback);
+}
+
+function saveToDB2(story){
+    console.log("Event Listener");
+    console.log(story);
     let saves_cookie = getCookie("saves");
     let saves_json = {};
     saves_json = saves_cookie !== ''? JSON.parse(saves_cookie): {};
