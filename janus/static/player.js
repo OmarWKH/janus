@@ -250,6 +250,14 @@ function getCookie(cname) {
     return "";
 }
 
+function deleteCookieSave(story_id) {
+    console.log("Deleting save for " + story_id);
+    saves_json = JSON.parse(getCookie("saves"));
+    delete saves_json[story_id];
+    setCookie("saves",JSON.stringify(saves_json),player.expiration_days);
+}
+
+
 function saveToDB(){
     let saves_cookie = getCookie("saves");
     let saves_json = {};
@@ -308,6 +316,19 @@ function saveFeedbackCallback(status, httpResponse){
             break;
         case create_status: // when user is logged in, httpResponse is json, each story id and its save status (created/updated/ignored)
             feedback = "Create: " + httpResponse;
+            created = updated = removed = 0;
+            JSON.parse(httpResponse, (story_id, state) => {
+                switch (state) {
+                    case "ignored":
+                        deleteCookieSave(story_id);
+                        removed++; break;
+                    case "created":
+                        created++; break;
+                    case "updated":
+                        updated++; break;
+                    default: break;
+                }
+            });
             break;
         default: // unknown, shouldn't happen
             feedback = "Status|Response: " + status + " | " + httpResponse;
