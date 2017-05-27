@@ -38,7 +38,7 @@ def create_story():
 
 @app.route('/play/<story_id>')
 def play_story(story_id):
-	story = Story.query.filter_by(_id=story_id).first_or_404()
+	story = Story.query.get_or_404(story_id)
 
 	story_id = int(story_id)
 	save = None
@@ -61,7 +61,7 @@ def save_checkpoints():
 	saves = json.loads(request.values['saves'])
 	for _id in saves:
 		data = json.dumps(saves[_id]) 
-		story = Story.query.filter_by(_id=_id).first()
+		story = Story.query.get(_id)
 		if story:
 			save = Save.query.filter_by(user=user, story=story).first()
 			if save:
