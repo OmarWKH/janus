@@ -1,3 +1,6 @@
+
+
+
 function Node(i) {
     "use strict";
     this.id = "";
@@ -5,7 +8,7 @@ function Node(i) {
     this.content = "";
 	this.x = 0;
     this.y = 0;
-	this.size = 3;
+	this.size = 10;
 }
 function Edge(j) {
     "use strict";
@@ -14,6 +17,7 @@ function Edge(j) {
     this.source = "";
     this.target = "";
     this.type = "curvedArrow";
+    this.count = j + 1;
     this.end = false;
 }
 function readNodes(events) {

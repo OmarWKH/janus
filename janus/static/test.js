@@ -1,7 +1,7 @@
 function test() {
     "use strict";
-    var container = document.getElementById("json_ting");
-    createGraph(jsonFile, container);
+    var container = document.getElementById("json_ting"),icontainer = document.getElementById("cont") ;
+    createGraph(jsonFile, container, icontainer);
 }
 
 var jsonFile = {

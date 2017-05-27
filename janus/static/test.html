@@ -2,21 +2,33 @@
 <html>
 <head>
     <!--START SIGMA IMPORTS -->
-<script src="sigma/sigma.min.js"></script>
+<script src="./build/sigma.min.js"></script>
+<script src="./build/plugins/sigma.renderers.parallelEdges.min.js"></script>
+<script src="./build/plugins/sigma.plugins.dragNodes.min.js"></script>    
 <title>Basic sigma.js example</title>
 <script type="text/javascript" src="./sigmaGraph.js"></script>
 <script type="text/javascript" src="./sigma_layout.js"></script>
 <script type="text/javascript" src="./json_layout.js"></script>
 <script type="text/javascript" src="test.js"></script>
   <style type="text/css">
+      html{
+          height: 100%;
+          width: 100%;
+      }
     body{
-      margin: 0;
+        display:flex;
+        flex-flow: column;
+        height: inherit;
+        width:inherit;
     }
       #json_ting {
-          position: absolute;
-          height: 80%;
-          width: 100%;
+        height: 50%;
+        width: 100%;
         }
+      #cont {
+        height: 50%;
+        width: 100%;
+      }
     </style>
 </head>
 <body onload="test()">
