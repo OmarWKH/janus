@@ -148,7 +148,7 @@ function player(story_id, story_json, db_save) {
 
     }
 
-    document.addEventListener("onunload",saveToDB2(story_json));
+    document.addEventListener("onunload",saveToDBOnUnload(story_json));
 
     this.start = function(story_json){
         // let target_event = loadSaveFromCookies();
@@ -265,7 +265,7 @@ function saveToDB(){
     httpPostAsync(url, params, saveFeedbackCallback);
 }
 
-function saveToDB2(story){
+function saveToDBOnUnload(story){
     console.log("Event Listener");
     console.log(story);
     let saves_cookie = getCookie("saves");
