@@ -12,6 +12,14 @@ function Choice(edge) {
     this.end = edge.end;
 }
 
+function Story(graph) {
+    "use strict";
+    this.id = graph.id;
+    this.title = graph.title;
+    this.Author = graph.author;
+    this.Events = setEvents(graph);
+}
+
 function setEvents(graph) {
     "use strict";
     var Events = [];
@@ -24,11 +32,4 @@ function setEvents(graph) {
     });
     return Events;
 }
-
-function Story(graph) {
-    "use strict";
-    this.Events = setEvents(graph);
-}
-
-
 

@@ -5,7 +5,7 @@ function Node(i) {
     this.content = "";
 	this.x = 0;
     this.y = 0;
-	this.size = 3;
+	this.size = 0;
 }
 function Edge(j) {
     "use strict";
@@ -13,7 +13,7 @@ function Edge(j) {
     this.choice = "";
     this.source = "";
     this.target = "";
-    this.type = "curvedArrow";
+    this.type = "";
     this.end = false;
 }
 function readNodes(events) {
@@ -24,7 +24,6 @@ function readNodes(events) {
         node.id = 'n' + event.Event_id;
         node.label = event.Event_title;
         node.content = event.Event_Content;
-        node.x = (index / events.length) * (index > events.length ? -1 : 1);
         nodes.push(node);
     });
     return nodes;
@@ -50,6 +49,9 @@ function readEdges(events) {
 
 function SigmaLayout(s) {
     "use strict";
+    this.id = s.Story.id;
+    this.title = s.Story.title;
+    this.author = s.Story.Author;
     this.nodes = readNodes(s.Story.Events);
     this.edges = readEdges(s.Story.Events);
 }

@@ -1,22 +1,26 @@
 
-var graph, story,
-    createGraph = function (jsonF, container) {
-        "use strict";
-        story = new SigmaLayout(jsonF);
-        graph = new sigma({
-            graph: story,
+var graph, story;
+
+function createGraph(jsonF, container) {
+    "use strict";
+    story = new SigmaLayout(jsonF);
+
+    graph = new sigma({
+        graph: story,
+        container: "json_ting",
+        settings: {
+            defaultNodeColor: "#ec5148",
+            defaultLabelSize: 11
+        },
+        renderer: {
             container: container,
-            settings: {
-                defaultNodeColor: "#ec5148",
-                defaultLabelSize: 11
-            },
-            renderer: {
-                container: container,
-                type: "canvas"
-            }
-            
-        });
-    };
+            type: 'canvas'
+        }
+
+    });
+}
+
+
 //    window.addEventListener('keydown', addANode, false);
 //    window.addEventListener('mousemove', updateMousePos, false);
 
