@@ -18,7 +18,7 @@ class Story(db.Model):
 	author_id = db.Column(db.Integer, db.ForeignKey('user._id'), nullable=False)
 	title = db.Column(db.String())
 	published = db.Column(db.Boolean(), default=False, nullable=False)
-	image_name = db.Column(db.String())
+	image_name = db.Column(db.String(), default='default.jpeg')
 	create_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 	json = db.Column(db.Text)
 

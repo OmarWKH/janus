@@ -42,7 +42,7 @@ def create_story():
 		published = 'published' in request.form
 		json = request.form['story_json'] # to be removed, json creation is not done here
 
-		image_name = ''
+		image_name = 'default.jpeg'
 		if 'image' in request.files:
 			image = request.files['image']
 			if image.filename != '' and allowed_image(image.filename):
