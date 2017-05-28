@@ -6,6 +6,7 @@ function player(story_id, story_json, db_save) {
     this.init = function(story_id, story_json, db_save){
         window.addEventListener("load", start);
         window.addEventListener("unload", function(){saveToDB(story_id);});
+
         console.log("DB Save:");
         console.log(db_save);
 
@@ -144,6 +145,7 @@ function player(story_id, story_json, db_save) {
     }
 
     this.start = function(story_json){
+        document.getElementById("share_div").style.display = "none";
         // let target_event = loadSaveFromCookies();
         // let target_event = loadFromDB();
         let cookie_save = getSaveFromCookies();
@@ -184,6 +186,7 @@ function player(story_id, story_json, db_save) {
         let choice_target = branch.Next_event;
         console.log(choice_target);
         if( branch.end === true){
+            document.getElementById("share_div").style.display = "block";
             document.getElementById("E_choices").innerHTML +=
                 "<button type=\"button\" title=\"" + choice_text +
                 "\" onClick=\"end_event("+
@@ -197,11 +200,16 @@ function player(story_id, story_json, db_save) {
     }
 
     this.end_event = function(id){
+
         console.log("Story ended at Event: "+id);
         console.log("Save:");
         console.log(save);
         console.log(document.cookie);
+        let url = window.location.protocol + "//" + window.location.host + "/list";
+        window.location.href = url;
     }
+
+
 
     function  getSaves(){
         return saves;
