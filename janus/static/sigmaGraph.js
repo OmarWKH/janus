@@ -3,12 +3,19 @@ var graph, story,
     createGraph = function (jsonF, gcontainer, icontainer) {
         "use strict";
         story = new SigmaLayout(jsonF);
+        
+        sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
+            var lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
+            return Number.parseInt(lastEdgeID.substr(1));
+        });
+        
         graph = new sigma({
             graph: story,
             container: gcontainer,
             settings: {
                 defaultNodeColor: "#ec5148",
-                defaultLabelSize: 11
+                defaultLabelSize: 11,
+                doubleClickEnabled: false
             },
             renderer: {
                 container: gcontainer,
@@ -16,27 +23,12 @@ var graph, story,
             }
             
         });
+
         createInfoBox(icontainer);
         var dragListener = sigma.plugins.dragNodes(graph, graph.renderers[0]);
-//        gcontainer.lastChild.addEventListener("click", function (e){
-//            console.log(sigma.utils.getX(e));
-//            var x = e.data.captor.clientX - gcontainer.offsetWidth / 2,
-//                y = e.data.captor.clientY - gcontainer.offsetHeight / 2;
-//            console.log(x + " " + y);
-//            var p = graph.camera.cameraPosition(x, y);
-//            console.log(p.x + " " +p.y);
-//            graph.graph.addNode({
-//                id: graph.graph.nodes().length,
-//                size: 3,
-//                x: x,
-//                y: y
-//            });
-//            graph.refresh();  
-//        })
-        graph.bind('clickStage', function (e){
+
+        graph.bind('doubleClickStage', function (e){
             var n = graph.graph.nodes().length + 1;
-            console.log((n+1) / n);
-            
             
             graph.graph.addNode({
                 id: 'n' + n,
@@ -49,6 +41,7 @@ var graph, story,
     },
     
     createInfoBox = function (icontainer){
+        
         var nodeInfoForm, nLabel, nodeLabel, targets, ctaLabel, contentArea;
         nodeInfoForm = document.createElement("form");
         nLabel = document.createElement("span");
@@ -59,12 +52,14 @@ var graph, story,
         
         nLabel.innerHTML = "Node Label";
         nodeLabel.type = "text";
+        
         targets.name = "targets";
         targets.id = "nodeTaregets";
         targets.style = "display:flex; flex-flow: column; ";
         
         ctaLabel.innerHTML = "Content of Node";
         contentArea.style.width = "100%";
+        
         nodeInfoForm.appendChild(nLabel);
         nodeInfoForm.appendChild(nodeLabel);
         nodeInfoForm.appendChild(targets);
@@ -75,42 +70,50 @@ var graph, story,
         
         graph.bind('clickNode', function(e) {
             node = e.data.node;
+            nodeInfoForm.id = node.id;
             nodeLabel.value = node.label;
             nodeLabel.addEventListener('change', function(e){
-               node.label = nodeLabel.value; 
+                node.label = nodeLabel.value;
+                graph.refresh();
             });
             setTargets(targets, node);
             contentArea.value = node.content;
             contentArea.addEventListener('change', function(e){
-               node.content = contentArea.value; 
+                node.content = contentArea.value;
+                graph.refresh();
             });
             
         });
+        graph.bind('doubleClickNode', function (e){
+            graph.graph = graph.graph.dropNode(e.data.node.id);
+            graph.refresh();
+        });
         
-
     };
 
     function setTargets(cont, node) {
-        var choiceDiv, tNode, sChoice, cLabel, sLabel, removeBtn, addBtn, addChoice, cDatalist, Nodes, Edges;
+        var choiceDiv, tChoices = [], tNode, sChoice, cLabel, sLabel, removeBtn, addBtn, addChoice, cDatalist, Nodes, Edges;
         
         Nodes = graph.graph.nodes;
         Edges = graph.graph.edges;
         
-
-        
         while(cont.firstChild){
             cont.removeChild(cont.firstChild);
         }
+        Nodes().forEach(function (n, i){
+            var op = document.createElement("option");
+            op.text = n.label;
+            op.value = n.id;
+            tChoices.push(op);
+        });
 
         Edges().forEach(function (edge){
             if(edge.source === node.id){
                 createChoiceElements();
-                tNode.value = Nodes(edge.target).label;
-                tNode.id = edge.target;
+                tNode.value = Nodes(edge.target).id;
+                tNode.name = edge.id;
+                changeEdges(tNode);
                 
-//                tNode.addEventListener('change', function (e){
-//                    
-//                });
                 sChoice.value = edge.choice;
                 sChoice.id = edge.target;
                 
@@ -122,10 +125,13 @@ var graph, story,
         addBtn.style = "color: green;";
         addBtn.addEventListener('click', function (e){
             createChoiceElements();
+            tNode.value = '';
+            changeEdges(tNode);
             appendChoiceElements();
             cont.insertBefore(cont.lastChild, addBtn);
         });
         cont.appendChild(addBtn);
+        
         function createChoiceElements(){
             choiceDiv = document.createElement("div");
             choiceDiv.style = "display: flex; flex-flow: row;";
@@ -138,11 +144,9 @@ var graph, story,
 
             tNode = document.createElement("select");
             tNode.class = "tNodes";
-            Nodes().forEach(function (e, i){
-                var op = document.createElement("option");
-                op.text = e.label;
-                op.id = e.id;
-                tNode.options.add(op, i);
+            tChoices.forEach(function (o, i){
+                var op = o.cloneNode(true);
+                tNode.appendChild(op, i);
             });
             
             sChoice = document.createElement("input");
@@ -155,6 +159,7 @@ var graph, story,
                cont.removeChild(this.parentElement);
             });
         }
+        
         function appendChoiceElements(){
             choiceDiv.appendChild(cLabel);
             choiceDiv.appendChild(sChoice);
@@ -162,5 +167,25 @@ var graph, story,
             choiceDiv.appendChild(tNode);
             choiceDiv.appendChild(removeBtn);
             cont.appendChild(choiceDiv);
+        }
+        function changeEdges(selected){
+                 tNode.addEventListener('change', function (e){
+                    var oldEdge, newEdge, lastEdgeInedx;
+                    lastEdgeInedx = graph.graph.getLastEdgeInedx();
+                    oldEdge = Edges(selected.name) || new Edge(-1);
+                    newEdge = new Edge(lastEdgeInedx+1);
+                    newEdge.id = 'e' + Number.parseInt(lastEdgeInedx+1);
+                    newEdge.choice = oldEdge.choice || '';
+                    newEdge.count = oldEdge.count || 0;
+                    newEdge.end = oldEdge.end || false;
+                    newEdge.type = oldEdge.type || "curvedArrow";
+                    newEdge.source = e.path[3].id || '';
+                    newEdge.target = selected.value || '';
+                    selected.name = newEdge.id;
+                    if(Edges(oldEdge.id)){graph.graph = graph.graph.dropEdge(oldEdge.id);}
+                    graph.graph = graph.graph.addEdge(newEdge);
+                    console.log(Edges(newEdge.id));
+                    graph.refresh();
+                });
         }
     }

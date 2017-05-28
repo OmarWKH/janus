@@ -1,8 +1,4 @@
 
-var canv = document.getElementsByClassName("sigma-mouse"),
-    canvWid = canv.offsetWidth;
-    canvHei = canv.offsetHeight;
-
 function Node(i) {
     "use strict";
     this.id = "";
@@ -44,8 +40,8 @@ function readEdges(events) {
             var edge = new Edge(jndex);
             edge.choice = branch.choice;
             edge.source = 'n' + event.Event_id;
-            edge.id = 'e' + index + jndex;
             edge.target = 'n' + branch.Next_event;
+            edge.id = 'e' + edges.length;
             edge.end = branch.end;
             edges.push(edge);
         });
