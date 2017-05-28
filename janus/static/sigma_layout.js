@@ -69,5 +69,21 @@ function SigmaLayout(s) {
     var E = readEdges(s.Events);
     this.edges = E[0] || [];
     this.endings = E[1] || [];
+    this.removeHedge = function (id){
+        endings.forEach(function (e){
+           if(e.id === id){
+               return true;
+           }
+        });
+        return false;
+    }
+    this.getHedge = function(id){
+        endings.forEach(function (e){
+            if(e.id === id){
+               return e;
+           }
+        });
+        return undefined;  
+    }
 }
 

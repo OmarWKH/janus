@@ -7,7 +7,7 @@ var graph, story,
         sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
             if (this.edgesArray.length>0){
             var lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
-            return Number.parseInt(lastEdgeID.id.substr(1));
+            return Number.parseInt(lastEdgeID.substr(1));
             }
             return 0;
         });
@@ -73,9 +73,6 @@ var graph, story,
         ctaLabel.innerHTML = "Content of Node";
         contentArea.style.width = "100%";
         
-//        endSpan.innerHTML = "Is this an Ending Node";
-//        endBox.type = "checkbox";
-        
         nodeInfoForm.appendChild(nLabel);
         nodeInfoForm.appendChild(nodeLabel);
         nodeInfoForm.appendChild(targets);
@@ -88,17 +85,17 @@ var graph, story,
             node = e.data.node;
             nodeInfoForm.id = node.id;
             nodeLabel.value = node.label;
+            setTargets(targets, node);
             nodeLabel.addEventListener('change', function(e){
                 node.label = nodeLabel.value;
+                updateOptions();
                 graph.refresh();
             });
-            setTargets(targets, node);
             contentArea.value = node.content;
             contentArea.addEventListener('change', function(e){
                 node.content = contentArea.value;
                 graph.refresh();
             });
-
         });
         graph.bind('doubleClickNode', function (e){
             graph.graph = graph.graph.dropNode(e.data.node.id);
@@ -116,13 +113,6 @@ var graph, story,
         while(cont.firstChild){
             cont.removeChild(cont.firstChild);
         }
-        Nodes().forEach(function (n, i){
-            var op = document.createElement("option");
-            op.text = n.label;
-            op.value = n.id;
-            tChoices.push(op);
-        });
-
         Edges().forEach(function (edge){
             if(edge.source === node.id){
                 createChoiceElements();
@@ -135,6 +125,7 @@ var graph, story,
                 changeChoice(sChoice);
                 appendChoiceElements();
             }
+        updateOptions();
         });
         addBtn = document.createElement("div");
         addBtn.innerHTML = "+";
@@ -145,6 +136,7 @@ var graph, story,
             changeEdges(tNode);
             appendChoiceElements();
             cont.insertBefore(cont.lastChild, addBtn);
+            updateOptions();
         });
         cont.appendChild(addBtn);
         
@@ -161,9 +153,9 @@ var graph, story,
             tNode = document.createElement("select");
             tNode.class = "tNodes";
             
-            tChoices.forEach(function (o, i){
+            tChoices.forEach(function (o){
                 var op = o.cloneNode(true);
-                tNode.appendChild(op, i);
+                tNode.add(op);
             });
             
             sChoice = document.createElement("input");
@@ -176,9 +168,16 @@ var graph, story,
             endSpan.innerHTML = "is this an Ending Choice";
             
             endBox.addEventListener('change', function (e){
+                var id = e.path[1].getElementsByTagName("select").name;
                 if(e.srcElement.checked){
-                    
+                    story.endings.push(Edges(id));
+                    graph.graph.dropEdge(id);
                 }
+                else{
+                    graph.graph.addEdge(Edges(id));
+                    story.removeHedge(id);
+                }
+                graph.refresh();
             })
             removeBtn = document.createElement("span");
             removeBtn.innerHTML = "X";
@@ -219,7 +218,7 @@ var graph, story,
                     selected.name = newEdge.id;
                     if(Edges(oldEdge.id)){graph.graph = graph.graph.dropEdge(oldEdge.id);}
                     graph.graph = graph.graph.addEdge(newEdge);
-                    console.log(newEdge.id);
+                    updateOptions();
                     graph.refresh();
                 });
         }
@@ -229,5 +228,31 @@ var graph, story,
                 if(E){ E.choice = e.srcElement.value;}
                 graph.refresh();
             });
+        }
+
+}
+        function updateOptions(){
+            var Choices = [];
+            graph.graph.nodes().forEach(function (n, i){
+            var op = document.createElement("option");
+            op.text = n.label;
+            op.value = n.id;
+            Choices.push(op);
+        });
+            var selects = document.getElementsByTagName("select");
+            for (var i = 0; i< selects.length ; i++){
+                while(selects[i].firstChild){
+                    selects[i].removeChild(selects[i].firstChild);
+                }
+            }
+            console.log(Choices);
+            if(selects.length>0){
+            for (var i = 0; i < selects.length; i++){
+                Choices.forEach(function (o, x){
+                    var op = o.cloneNode(true);
+                    selects[i].appendChild(op, x);
+                });
+            }
+            console.log(selects);
         }
     }
