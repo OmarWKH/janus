@@ -37,13 +37,16 @@ function readEdges(events) {
     var edges = [];
     events.forEach(function (event, index) {
         event.Default_branch.forEach(function (branch, jndex) {
-            var edge = new Edge(jndex);
-            edge.choice = branch.choice;
-            edge.source = 'n' + event.Event_id;
-            edge.target = 'n' + branch.Next_event;
-            edge.id = 'e' + edges.length;
-            edge.end = branch.end;
-            edges.push(edge);
+            
+            if (events[branch.Next_event]) {
+                var edge = new Edge(jndex);
+                edge.choice = branch.choice;
+                edge.source = 'n' + event.Event_id;
+                edge.target = 'n' + branch.Next_event;
+                edge.id = 'e' + edges.length;
+                edge.end = branch.end;
+                edges.push(edge);
+            }
         });
     });
 

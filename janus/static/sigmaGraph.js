@@ -15,7 +15,8 @@ var graph, story,
             settings: {
                 defaultNodeColor: "#ec5148",
                 defaultLabelSize: 11,
-                doubleClickEnabled: false
+                doubleClickEnabled: false,
+                immutable: false
             },
             renderer: {
                 container: gcontainer,
@@ -42,13 +43,15 @@ var graph, story,
     
     createInfoBox = function (icontainer){
         
-        var nodeInfoForm, nLabel, nodeLabel, targets, ctaLabel, contentArea;
+        var nodeInfoForm, nLabel, nodeLabel, targets, ctaLabel, contentArea, endSpan, endBox;
         nodeInfoForm = document.createElement("form");
         nLabel = document.createElement("span");
         nodeLabel = document.createElement("input");
         targets = document.createElement("div");
         ctaLabel = document.createElement("span");
         contentArea = document.createElement("textarea");
+//        endSpan = document.createElement("span");
+//        endBox = document.createElement("input");
         
         nLabel.innerHTML = "Node Label";
         nodeLabel.type = "text";
@@ -59,6 +62,9 @@ var graph, story,
         
         ctaLabel.innerHTML = "Content of Node";
         contentArea.style.width = "100%";
+        
+//        endSpan.innerHTML = "Is this an Ending Node";
+//        endBox.type = "checkbox";
         
         nodeInfoForm.appendChild(nLabel);
         nodeInfoForm.appendChild(nodeLabel);
@@ -82,7 +88,7 @@ var graph, story,
                 node.content = contentArea.value;
                 graph.refresh();
             });
-            
+
         });
         graph.bind('doubleClickNode', function (e){
             graph.graph = graph.graph.dropNode(e.data.node.id);
@@ -92,7 +98,7 @@ var graph, story,
     };
 
     function setTargets(cont, node) {
-        var choiceDiv, tChoices = [], tNode, sChoice, cLabel, sLabel, removeBtn, addBtn, addChoice, cDatalist, Nodes, Edges;
+        var choiceDiv, tChoices = [], tNode, sChoice, cLabel, sLabel, removeBtn, addBtn, addChoice, Nodes, Edges;
         
         Nodes = graph.graph.nodes;
         Edges = graph.graph.edges;
@@ -115,8 +121,8 @@ var graph, story,
                 changeEdges(tNode);
                 
                 sChoice.value = edge.choice;
-                sChoice.id = edge.target;
-                
+                sChoice.name = edge.id;
+                changeChoice(sChoice);
                 appendChoiceElements();
             }
         });
@@ -187,5 +193,12 @@ var graph, story,
                     console.log(Edges(newEdge.id));
                     graph.refresh();
                 });
+        }
+        function changeChoice(choice){
+            choice.addEventListener('change',function (e){
+                var E = Edges(e.path[1].getElementsByTagName("select")[0].name);
+                E.choice = e.srcElement.value;
+                graph.refresh();
+            });
         }
     }
