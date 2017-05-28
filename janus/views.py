@@ -6,6 +6,7 @@ import json
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
+from sqlalchemy.exc import IntegrityError
 
 ## Tests
 @app.route('/playtest')
@@ -113,18 +114,42 @@ def send_image(name):
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 	if request.method == 'POST':
+		success = True
+
 		username = request.form['username']
 		password = request.form['password']
 		email = request.form['email']
 		first_name = request.form['first_name']
 		last_name = request.form['last_name']
 
+		if username == '':
+			flash('Username can not be empty')
+			success = False;
+
+		if email == '':
+			flash('Email can no be empty')
+			success = False
+
 		user = User(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
 		db.session.add(user)
 
-		db.session.commit()
-		flash("Registered")
-		return redirect(url_for('login'))
+		if success:
+			try:
+				db.session.commit()
+				flash("Registered")
+			except IntegrityError as ie:
+				arg = ie.args[0]
+				offending_table = arg.rsplit(' ')[-1]
+				offending_attribute = offending_table.rsplit('.')[1]
+				# offending_value = ie.params[0]
+				message = "{0} already exists".format(offending_attribute)
+				flash(message)
+				success = False
+
+		if success:
+			return redirect(url_for('login', username=username))
+		else:
+			return render_template('register.html', username=username, email=email, first_name=first_name, last_name=last_name)
 	return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -132,8 +157,12 @@ def login():
 	if current_user.is_authenticated:
 		return redirect(url_for('list_stories'))
 
+	if 'username' in request.values:
+		username = request.values['username']
+	else:
+		username = ''
+
 	if request.method == 'POST':
-		username = request.form['username']
 		password = request.form['password'] # should not be passed so plainly
 		
 		user = User.query.filter_by(username=username).first()
@@ -145,7 +174,7 @@ def login():
 				return redirect(url_for('list_stories'))
 
 		flash('Wrong username or password')
-	return render_template('login.html')
+	return render_template('login.html', username=username)
 
 @app.route('/logout')
 def logout():

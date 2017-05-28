@@ -36,7 +36,7 @@ class Story(db.Model):
 class User(db.Model):
 	_id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(), unique=True, nullable=False)
-	email = db.Column(db.String(), unique=True)
+	email = db.Column(db.String(), unique=True, nullable=False)
 	password_hash = db.Column(db.String())
 	first_name = db.Column(db.String())
 	last_name = db.Column(db.String())
