@@ -2,13 +2,22 @@
 var graph, story,
     createGraph = function (jsonF, gcontainer, icontainer) {
         "use strict";
-        story = new SigmaLayout(jsonF);
+        story = new SigmaLayout("");
         
         sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
+            if (this.edgesArray.length>0){
             var lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
-            return Number.parseInt(lastEdgeID.substr(1));
+            return Number.parseInt(lastEdgeID.id.substr(1));
+            }
+            return 0;
         });
-        
+        sigma.classes.graph.addMethod('getLastNodeIndex', function (){
+            if (this.nodesArray.length > 0){
+            var lastNodeID = this.nodesArray[this.nodesArray.length-1].id;
+            return Number.parseInt(lastNodeID.substr(1));
+                }
+            return 0;
+        });
         graph = new sigma({
             graph: story,
             container: gcontainer,
@@ -29,7 +38,7 @@ var graph, story,
         var dragListener = sigma.plugins.dragNodes(graph, graph.renderers[0]);
 
         graph.bind('doubleClickStage', function (e){
-            var n = graph.graph.nodes().length + 1;
+            var n = graph.graph.getLastNodeIndex()+1;
             
             graph.graph.addNode({
                 id: 'n' + n,
