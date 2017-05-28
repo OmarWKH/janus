@@ -44,7 +44,7 @@ var jsonFile = {
                               "Event_title" : "Death",
                               "Event_Content" : "A Scream pierced your ears, your bones started to shatter, your vision...Darkened.",
                               "Default_branch" :  [ 
-                                            { "choice" : "The End", "Next_event": "3", "end" : true },
+                                            { "choice" : "The End", "Next_event": "4", "end" : true },
                                           ]
                             },
                              ]
