@@ -1,8 +1,11 @@
-from flask import render_template, redirect, url_for, request, flash, session
+from flask import render_template, redirect, url_for, request, flash, session, send_from_directory
 from flask_login import login_required, login_user, logout_user, current_user
 from janus import app, login_manager
 from janus.models import db, Story, User, Save
 import json
+from werkzeug.utils import secure_filename
+from datetime import datetime
+import os
 
 ## Tests
 @app.route('/playtest')
@@ -28,12 +31,32 @@ def list_stories():
 @app.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_story():
+	image_folder = app.config['IMAGE_FOLDER']
+	image_extensions = set(['png', 'jpg', 'jpeg', 'gif'])
+	# catch RequestEntityTooLarge, size is declared in models.py
+
 	if request.method == 'POST':
-		new_story = Story(json=request.form['story_json'])
+		author = current_user
+		title = request.form['title']
+		published = 'published' in request.form
+		json = request.form['story_json'] # to be removed, json creation is not done here
+
+		image_name = ''
+		if 'image' in request.files:
+			image = request.files['image']
+			if image.filename != '' and allowed_image(image.filename):
+				image_extension = extension(image.filename).lower()
+				image_name = author.username + '.' + str(datetime.utcnow()) + '.' + image_extension
+				image_name = secure_filename(image_name)
+				image.save(os.path.join(image_folder, image_name))
+				image.close()
+		
+		new_story = Story(author=author, title=title, published=published, image_name=image_name, json=json)
 		db.session.add(new_story)
 		db.session.commit()
 		flash("Created story")
 		return redirect(url_for('list_stories'))
+	
 	return render_template('create.html')
 
 @app.route('/play/<story_id>')
@@ -78,6 +101,10 @@ def save_checkpoints():
 	created_status = 201 # https://httpstatuses.com/201
 	header = {'Content-Type': 'application/json'}
 	return (json.dumps(feedback), created_status, header)
+
+@app.route('/images/<name>')
+def send_image(name):
+	return send_from_directory(app.config['IMAGE_FOLDER'], name)
 
 ## Users
 @app.route('/register', methods=['GET', 'POST'])
@@ -126,4 +153,17 @@ def logout():
 @app.route('/profile/<username>')
 def profile(username):
 	user = User.query.filter_by(username=username).first()
-	render_template('profile.html', user=user)
+	creations = user.creations
+	return render_template('profile.html', user=user, creations=creations)
+
+## Helpers
+
+# http://flask.pocoo.org/docs/0.12/patterns/fileuploads/
+def allowed_image(image_name):
+	image_extensions = set(['png', 'jpg', 'jpeg', 'gif'])
+	return extension(image_name).lower() in image_extensions
+
+def extension(filename):
+	if '.' in filename:
+		return filename.rsplit('.', 1)[1]
+	return ''

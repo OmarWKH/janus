@@ -10,6 +10,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.get
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # costly feature that is not used
 db = SQLAlchemy(app)
 
+app.config['IMAGE_FOLDER'] = os.path.join(app.static_folder, 'images')
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 # 2 megabytes
+
 class Story(db.Model):
 	_id = db.Column(db.Integer, primary_key=True)
 	author_id = db.Column(db.Integer, db.ForeignKey('user._id'), nullable=False)
@@ -21,7 +24,7 @@ class Story(db.Model):
 
 	author = db.relationship('User', backref=db.backref(
 		'creations',
-		collection_class=attribute_mapped_collection('story_id'),
+		collection_class=attribute_mapped_collection('_id'),
 		cascade='all, delete-orphan'
 		)
 	)
