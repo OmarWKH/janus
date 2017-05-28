@@ -85,8 +85,11 @@ def register():
 	if request.method == 'POST':
 		username = request.form['username']
 		password = request.form['password']
+		email = request.form['email']
+		first_name = request.form['first_name']
+		last_name = request.form['last_name']
 
-		user = User(username=username, password=password)
+		user = User(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
 		db.session.add(user)
 
 		db.session.commit()
@@ -119,3 +122,8 @@ def logout():
 	logout_user()
 	flash("Logged out")
 	return redirect(url_for('list_stories'))
+
+@app.route('/profile/<username>')
+def profile(username):
+	user = User.query.filter_by(username=username).first()
+	render_template('profile.html', user=user)
