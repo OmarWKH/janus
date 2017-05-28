@@ -1,0 +1,121 @@
+*{
+    box-sizing: border-box;
+}
+
+body{
+    background-color: lightyellow;
+    font-family: 'Lato', sans-serif;
+    line-height: 1.5;
+}
+
+.header{
+    background-color: #333;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+            
+li {
+    float: left;
+}
+
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a:hover:not(.active) {
+    background-color: black;
+}
+
+.active {
+    background-color: orangered;
+}
+
+.image{
+    position: relative;
+}
+
+h1 span{
+    position: absolute;
+    top: 60px;
+    left: 300px;
+    color: white;
+    letter-spacing: 0px;
+    padding: 10px;
+    font-size: 50px;
+}
+
+.header .btn-xs{
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 4px;
+    padding: 1px 5px;
+    font-size: 13px;
+    font-weight: normal;
+    text-align: center;
+    line-height: 1.5;
+    border-radius: 0;
+    color: white;
+    background-color: orangered;
+    border-color: #333;
+    display: inline;
+    vertical-align: middle;
+}
+
+.content{
+    float: left;
+    width: 100%;
+    margin-top: 5px;
+    padding-top: 6px;
+    border-top: 1px dashed lightgrey;
+    border-top-width: 1px;
+    border-top-style: dashed;
+    border-top-color: lightgrey;
+}
+
+.content .content-left{
+    width: 25%;
+    float: left;
+    position: relative;
+    padding-right: 10px;
+}
+
+.content .content-left img{
+    vertical-align: middle;
+    border: 0;
+    width: 100%;
+    height: auto;
+}
+
+.content .content-left .review-count{
+    text-align: center;
+    color: orangered;
+}
+
+.content .content-right{
+    width: 75%;
+    float: left;
+}
+
+.content .content-right h3{
+    font-weight: 400;
+    color: orangered;
+}
+
+.content .content-right text-center{
+    margin-bottom: 0px;
+    line-height: 1.35;
+    padding-bottom: 0px;
+    font-weight: 400;
+    font-size: 14px;
+    color: #333;
+}
