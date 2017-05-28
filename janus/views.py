@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, flash, session, send_from_directory
+from flask import render_template, redirect, url_for, request, flash, session, send_from_directory, abort
 from flask_login import login_required, login_user, logout_user, current_user
 from janus import app, login_manager
 from janus.models import db, Story, User, Save
@@ -25,7 +25,7 @@ def savetest():
 ## Main
 @app.route('/list')
 def list_stories():
-	stories = Story.query.all()
+	stories = Story.query.filter_by(published=True)
 	return render_template('list.html', stories=stories)
 
 @app.route('/create', methods=['GET', 'POST'])
@@ -63,12 +63,15 @@ def create_story():
 def play_story(story_id):
 	story = Story.query.get_or_404(story_id)
 
-	story_id = int(story_id)
-	save = None
-	if current_user.is_authenticated and story_id in current_user.saves:
-		save = current_user.saves[story_id]
+	if public_or_author(story):
+		story_id = int(story_id)
+		save = None
+		if current_user.is_authenticated and story_id in current_user.saves:
+			save = current_user.saves[story_id]
 
-	return render_template('play.html', story=story, save=save)
+		return render_template('play.html', story=story, save=save)
+	
+	return abort(404)
 
 @app.route('/save_checkpoints', methods=['POST'])
 # @login_required, but don't want a redirect to /login
@@ -154,7 +157,8 @@ def logout():
 def profile(username):
 	user = User.query.filter_by(username=username).first()
 	creations = user.creations
-	return render_template('profile.html', user=user, creations=creations)
+	filtered_creations = {_id: story for _id, story in creations.items() if public_or_author(story)}
+	return render_template('profile.html', user=user, creations=filtered_creations)
 
 ## Helpers
 
@@ -167,3 +171,6 @@ def extension(filename):
 	if '.' in filename:
 		return filename.rsplit('.', 1)[1]
 	return ''
+
+def public_or_author(story):
+	return story.published or (story.author == current_user)
