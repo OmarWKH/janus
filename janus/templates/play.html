@@ -1,13 +1,15 @@
-{% extends 'layout.html' %}
+<script src="../static/player.js"></script>{% extends 'layout.html' %}
 
 {% block head %}
     <script type="text/javascript" src="{{ url_for('static', filename='player.js') }}"></script>
     <script type="text/javascript">
     	player({{ story._id }}, {{ story.json|tojson }}, {{ save|tojson }});
     </script>
+<script type="text/javascript" src="//platform-api.sharethis.com/js/sharethis.js#property=592ad1289f0427001183fe70&product=inline-share-buttons"></script>
 {% endblock %}
 
 {% block body %}
+    <div id="share_div"><div class="sharethis-inline-share-buttons"></div></div>
     <ul id="Save_feedback"></ul>
     <div id="Story_control"><button name="save" onClick="saveToDB()">Save</button></div>
     <div id="E_data">
