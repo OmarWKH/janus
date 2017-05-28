@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-    <form id="createStoryForm" method="post" action="{{ url_for('create_story') }}">
+    <form id="createStoryForm" method="post" enctype="multipart/form-data" action="{{ url_for('create_story') }}">
         <textarea name="story_json">{ "Story": {
         "Events" : [
                 { "Event_id" : "0",
@@ -46,6 +46,9 @@
 
 
         }</textarea>
+        <input type="text" name="title">
+        <input type="checkbox" name="published">
+        <input type="file" name="image">
         <input type="submit" name="submit">
     </form>
 {% endblock %}

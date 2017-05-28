@@ -4,7 +4,9 @@
     <ul>
     	{% for story in stories %}
     		<li><a href="{{ url_for('play_story', story_id=story._id|e) }}">
-    			{{ story._id|e }}: {{ story.json|e }}
+    			{{ story._id|e }}: {{ story.title }}: {{ story.author.username }}<br>
+    			{{ story.published }}<br>
+    			<img src="{{ url_for('send_image', name=story.image_name) }}">
     		</a></li>
     	{% endfor %}
     </ul>
