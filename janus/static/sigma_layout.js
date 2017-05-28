@@ -1,5 +1,7 @@
 
-
+var canv = document.getElementsByClassName("sigma-mouse"),
+    canvWid = canv.offsetWidth;
+    canvHei = canv.offsetHeight;
 
 function Node(i) {
     "use strict";
@@ -28,7 +30,7 @@ function readNodes(events) {
         node.id = 'n' + event.Event_id;
         node.label = event.Event_title;
         node.content = event.Event_Content;
-        node.x = (index / events.length) * (index > events.length ? -1 : 1);
+        node.x = (index / events.length);
         nodes.push(node);
     });
     return nodes;
