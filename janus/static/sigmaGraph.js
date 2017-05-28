@@ -35,7 +35,9 @@ var graph, story,
                 id: 'n' + n,
                 size: 10,
                 x: (n+1) / n,
-                y: 0
+                y: 0,
+                label: '',
+                content: ''
             });
             graph.refresh();
         });
@@ -43,15 +45,14 @@ var graph, story,
     
     createInfoBox = function (icontainer){
         
-        var nodeInfoForm, nLabel, nodeLabel, targets, ctaLabel, contentArea, endSpan, endBox;
+        var nodeInfoForm, nLabel, nodeLabel, targets, ctaLabel, contentArea;
         nodeInfoForm = document.createElement("form");
         nLabel = document.createElement("span");
         nodeLabel = document.createElement("input");
         targets = document.createElement("div");
         ctaLabel = document.createElement("span");
         contentArea = document.createElement("textarea");
-//        endSpan = document.createElement("span");
-//        endBox = document.createElement("input");
+
         
         nLabel.innerHTML = "Node Label";
         nodeLabel.type = "text";
@@ -98,7 +99,7 @@ var graph, story,
     };
 
     function setTargets(cont, node) {
-        var choiceDiv, tChoices = [], tNode, sChoice, cLabel, sLabel, removeBtn, addBtn, addChoice, Nodes, Edges;
+        var choiceDiv, tChoices = [], tNode, sChoice, cLabel, sLabel, removeBtn, addBtn, addChoice, endBox, endSpan, Nodes, Edges;
         
         Nodes = graph.graph.nodes;
         Edges = graph.graph.edges;
@@ -150,6 +151,7 @@ var graph, story,
 
             tNode = document.createElement("select");
             tNode.class = "tNodes";
+            
             tChoices.forEach(function (o, i){
                 var op = o.cloneNode(true);
                 tNode.appendChild(op, i);
@@ -158,11 +160,27 @@ var graph, story,
             sChoice = document.createElement("input");
             sChoice.type = "text";
             
+            endBox = document.createElement("input");
+            endBox.type = "checkbox";
+            
+            endSpan = document.createElement("span");
+            endSpan.innerHTML = "is this an Ending Choice";
+            
+            endBox.addEventListener('change', function (e){
+                if(e.srcElement.checked){
+                    
+                }
+            })
             removeBtn = document.createElement("span");
             removeBtn.innerHTML = "X";
             removeBtn.style = "color: red; background-color: black;";
             removeBtn.addEventListener("click", function(e){
-               cont.removeChild(this.parentElement);
+                var eID = e.path[1].getElementsByTagName("select")[0].name;
+                if(eID){
+                    graph.graph.dropEdge(eID);
+                    }
+                cont.removeChild(this.parentElement);
+                graph.refresh();
             });
         }
         
@@ -171,6 +189,8 @@ var graph, story,
             choiceDiv.appendChild(sChoice);
             choiceDiv.appendChild(sLabel);
             choiceDiv.appendChild(tNode);
+            choiceDiv.appendChild(endSpan);
+            choiceDiv.appendChild(endBox);
             choiceDiv.appendChild(removeBtn);
             cont.appendChild(choiceDiv);
         }
@@ -181,7 +201,7 @@ var graph, story,
                     oldEdge = Edges(selected.name) || new Edge(-1);
                     newEdge = new Edge(lastEdgeInedx+1);
                     newEdge.id = 'e' + Number.parseInt(lastEdgeInedx+1);
-                    newEdge.choice = oldEdge.choice || '';
+                    newEdge.choice = oldEdge.choice || e.path[1].getElementsByTagName("input")[0].value;
                     newEdge.count = oldEdge.count || 0;
                     newEdge.end = oldEdge.end || false;
                     newEdge.type = oldEdge.type || "curvedArrow";
@@ -190,14 +210,14 @@ var graph, story,
                     selected.name = newEdge.id;
                     if(Edges(oldEdge.id)){graph.graph = graph.graph.dropEdge(oldEdge.id);}
                     graph.graph = graph.graph.addEdge(newEdge);
-                    console.log(Edges(newEdge.id));
+                    console.log(newEdge.id);
                     graph.refresh();
                 });
         }
         function changeChoice(choice){
             choice.addEventListener('change',function (e){
                 var E = Edges(e.path[1].getElementsByTagName("select")[0].name);
-                E.choice = e.srcElement.value;
+                if(E){ E.choice = e.srcElement.value;}
                 graph.refresh();
             });
         }
