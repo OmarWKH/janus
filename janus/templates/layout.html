@@ -8,6 +8,21 @@
 	{% block head %}{%endblock%}
 </head>
 <body>
+	<div class="header">
+        <div class="image">
+            <img src="bg.jpeg" width="1254" height="180" alt="Home screen icon">
+            <h1><span>Text Based RPG Games</span></h1>
+        </div>
+        <ul>
+            <li><a class="active" href="{{ url_for('list_stories')}}">Browse</a></li>
+            <li><a href="{{ url_for('create_story')}}">Create</a></li>
+            <li><a href="news.html">News</a></li>
+        </ul>
+        <div class="btn-xs">
+            <a href="{{ url_for('register')}}">Register</a>
+            <a href="{{ url_for('login')}}">Log in</a>
+        </div>
+    </div>
 	{% with messages = get_flashed_messages() %}
 		{% if messages %}
 			<ul id="flashes">
