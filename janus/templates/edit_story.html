@@ -1,26 +1,25 @@
-{% extends 'layout.html' %}
+<!DOCTYPE html>
 
-{% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='graph.css') }}">
+<html lang="en">
 
-      <style type="text/css">
-      html{
-          height: 100%;
-          width: 100%;
-      }
+<head>
+    <meta charset="utf-8">
+  <style type="text/css">
+    
     body{
         display:flex;
         flex-flow: column;
-        height: inherit;
-        width:inherit;
+        height: 95vh;
+        width:95vw;
     }
       #graph {
-        height: 50%;
-        width: 100%;
+        flex: 1;
         }
       #infoBox {
-        height: 50%;
-        width: 100%;
+        flex: 1;
+      }
+      #saveBtn {
+        width: 4em;
       }
     </style>
 
@@ -36,11 +35,14 @@
             init({{ story._id|e }}, {{ story.json|tojson }}, 'graph', 'infoBox');
         });
     </script>
-{% endblock %}
+</head>
 
-{% block body %}
+<body>
     <div id="graph">
     </div>
     <div id="infoBox">
     </div>
-{% endblock %}
+    <button id="saveBtn">Save</button>
+</body>
+
+</html>

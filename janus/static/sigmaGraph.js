@@ -9,7 +9,7 @@ var graph, story,
         "use strict";
         story = new SigmaLayout(jsonF);
         document.addEventListener('unload', function(e){
-            let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints"
+            let url = window.location.protocol + "//" + window.location.host + "/save_story"
             story = graph.graph;
             let json = new Story(story);
             let params = JSON.stringify(json);
@@ -72,11 +72,10 @@ var graph, story,
         targets = document.createElement("div");
         ctaLabel = document.createElement("span");
         contentArea = document.createElement("textarea");
-        saveBtn = document.createElement("button");
+        saveBtn = document.getElementById("saveBtn");
         
-        saveBtn.value = "Save";
         saveBtn.addEventListener('click', function (e){
-            let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints"
+            let url = window.location.protocol + "//" + window.location.host + "/save_story"
             story = graph.graph;
             let json = new Story(story);
             let params = JSON.stringify(json);
