@@ -128,6 +128,18 @@ var graph, story,
                 changeChoice(sChoice);
                 appendChoiceElements();
             }
+        story.endings.forEach(function (edge){
+                console.log("f");
+                createChoiceElements();
+                tNode.value = Nodes(edge.target).id;
+                tNode.name = edge.id;
+                changeEdges(tNode);
+                
+                sChoice.value = edge.choice;
+                sChoice.name = edge.id;
+                changeChoice(sChoice);
+                appendChoiceElements();
+        });
         updateOptions();
         });
         addBtn = document.createElement("div");
@@ -171,14 +183,15 @@ var graph, story,
             endSpan.innerHTML = "is this an Ending Choice";
             
             endBox.addEventListener('change', function (e){
-                var id = e.path[1].getElementsByTagName("select").name;
+                var id = e.path[1].getElementsByTagName("select")[0].name;
                 if(e.srcElement.checked){
                     story.endings.push(Edges(id));
                     graph.graph.dropEdge(id);
                 }
                 else{
-                    graph.graph.addEdge(Edges(id));
-                    story.removeHedge(id);
+                    console.log(story.getHedge(id));
+//                    graph.graph.addEdge();
+//                    story.removeHedge(id);
                 }
                 graph.refresh();
             })
@@ -236,6 +249,9 @@ var graph, story,
 }
         function updateOptions(){
             var Choices = [];
+            var opB = document.createElement("option");
+            opB.text = '...';
+            Choices.push(opB);
             graph.graph.nodes().forEach(function (n, i){
             var op = document.createElement("option");
             op.text = n.label;
@@ -248,7 +264,6 @@ var graph, story,
                     selects[i].removeChild(selects[i].firstChild);
                 }
             }
-            console.log(Choices);
             if(selects.length>0){
             for (var i = 0; i < selects.length; i++){
                 Choices.forEach(function (o, x){
@@ -256,7 +271,6 @@ var graph, story,
                     selects[i].appendChild(op, x);
                 });
             }
-            console.log(selects);
         }
     }
 

@@ -78,7 +78,7 @@ function SigmaLayout(s) {
         return false;
     }
     this.getHedge = function(id){
-        endings.forEach(function (e){
+        this.endings.forEach(function (e){
             if(e.id === id){
                return e;
            }
