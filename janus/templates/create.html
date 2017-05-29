@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-    <form id="createStoryForm" method="post" enctype="multipart/form-data" action="{{ url_for('create_story') }}">
+    <form id="createStoryForm" method="post" enctype="multipart/form-data" action="{{ action }}">
         <textarea name="story_json">{ "Story": {
         "Events" : [
                 { "Event_id" : "0",
@@ -46,9 +46,14 @@
 
 
         }</textarea>
-        <label>Title: </label><input type="text" name="title">
-        <label>Publish? </label><input type="checkbox" name="published">
-        <label>Upload an Image: </label><input type="file" name="image">
+        <label>Title: </label><input type="text" name="title" value="{{ story.title }}">
+        <label>Publish? </label><input type="checkbox" name="published" {{ checked }}>
+        {% if not story %}
+            <label>Upload an Image: </label><input type="file" name="image">
+        {% endif %}
         <input type="submit" name="submit">
     </form>
+    {% if story %}
+        <a href="{{ url_for('edit_story', _id=story._id) }}">Edit story content</a>
+    {% endif %}
 {% endblock %}

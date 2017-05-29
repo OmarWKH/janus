@@ -9,6 +9,8 @@ import os
 from sqlalchemy.exc import IntegrityError
 
 ## Main
+
+@app.route('/')
 @app.route('/list')
 def list_stories():
 	stories = Story.query.filter_by(published=True)
@@ -41,9 +43,35 @@ def create_story():
 		db.session.add(new_story)
 		db.session.commit()
 		flash("Created story")
-		return redirect(url_for('list_stories'))
+		return redirect(url_for('edit_story', _id=new_story._id))
 	
-	return render_template('create.html')
+	action = url_for('create_story')
+	return render_template('create.html', story=None, checked='')
+
+@app.route('/info/<_id>', methods=['GET', 'POST'])
+@login_required
+def edit_story_info(_id):
+	if request.method == 'POST':
+		story = Story.query.get_or_404(_id)
+
+		if story.author != current_user:
+			abort(404)
+
+		story.title = request.form['title']
+		story.published = 'published' in request.form
+		story.json = request.form['story_json'] # to be removed, json creation is not done here
+
+		db.session.add(story)
+		db.session.commit()
+		flash("Edited story info")
+		return redirect(url_for('edit_story', _id=story._id))
+	elif request.method	== 'GET':
+		story = Story.query.get_or_404(_id)
+		checked = ''
+		if story.published:
+			checked = 'checked'
+		action = url_for('edit_story_info', _id=story._id)
+		return render_template('create.html', story=story, checked=checked, action=action)
 
 @app.route('/edit_story/<_id>')
 @login_required
@@ -182,7 +210,7 @@ def login():
 			if valid:
 				login_user(user, remember=False)
 				flash('Logged in')
-				return redirect(url_for('list_stories'))
+				return redirect(url_for('profile', username=username))
 
 		flash('Wrong username or password')
 	return render_template('login.html', username=username)
@@ -195,7 +223,7 @@ def logout():
 
 @app.route('/profile/<username>')
 def profile(username):
-	user = User.query.filter_by(username=username).first()
+	user = User.query.filter_by(username=username).first_or_404()
 	creations = user.creations
 	filtered_creations = {_id: story for _id, story in creations.items() if public_or_author(story)}
 	return render_template('profile.html', user=user, creations=filtered_creations)

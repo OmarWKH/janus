@@ -9,10 +9,10 @@
     <script type="text/javascript" src="{{ url_for('static', filename='sigmaGraph.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='sigma_layout.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='json_layout.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename=''" }}></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='') }}"></script>
 
     <script type="text/javascript">
-        init({{ story.id|e }} , {{ story.json|tojson }}, 'graph', 'infoBox');
+        init({{ story.id|e }}, {{ story.json|tojson }}, 'graph', 'infoBox');
     </script>
 {% endblock %}
 
