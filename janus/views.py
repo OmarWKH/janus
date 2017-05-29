@@ -86,8 +86,8 @@ def edit_story(_id):
 def save_story():
 	story_id = request.values['id']
 	story_json = request.values['json']
-	
-	story = Story.query.get_or_404(_id)
+	print(story_id, story_json)
+	story = Story.query.get_or_404(story_id)
 	if story.author == current_user:
 		story.json = story_json
 		db.session.add(story)

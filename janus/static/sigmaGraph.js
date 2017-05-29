@@ -1,8 +1,9 @@
 
-var graph, story,
+var graph, story, story_id
     init = function (storyID, jsonF, gC, iC){
         gC = document.getElementById(gC);
         iC = document.getElementById(iC);
+        story_id = storyID;
         createGraph(jsonF, gC, iC);
     },
     createGraph = function (jsonF, gcontainer, icontainer) {
@@ -12,7 +13,8 @@ var graph, story,
             let url = window.location.protocol + "//" + window.location.host + "/save_story"
             story = graph.graph;
             let json = new Story(story);
-            let params = JSON.stringify(json);
+            let params = "json="+JSON.stringify(json);
+            params = params + "&id="+story_id;
             httpPostAsync(url, params);
         });
         sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
@@ -78,7 +80,8 @@ var graph, story,
             let url = window.location.protocol + "//" + window.location.host + "/save_story"
             story = graph.graph;
             let json = new Story(story);
-            let params = JSON.stringify(json);
+            let params = "json="+JSON.stringify(json);
+            params = params + "&id="+story_id;
             httpPostAsync(url, params);
         });
         
