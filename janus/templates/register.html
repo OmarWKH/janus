@@ -2,11 +2,16 @@
 
 {% block body %}
     <form id="registeration_form" method="post" action="{{ url_for('register') }}">
-        <input type="text" name="username" value="{{ username }}" required autofocus></input>
-        <input type="password" name="password" required></input>
-        <input type="email" name="email" value="{{ email }}"></input>
-        <input type="text" name="first_name" value="{{ first_name }}"></input>
-        <input type="text" name="last_name" value="{{ last_name }}"></input>
+        <label>Username: </label>
+        <input type="text" name="username" value="{{ username }}" required autofocus></input><br>
+        <label>Password: </label>
+        <input type="password" name="password" required></input><br>
+        <label>Email: </label>
+        <input type="email" name="email" value="{{ email }}"></input><br>
+        <label>First Name: </label>
+        <input type="text" name="first_name" value="{{ first_name }}"></input><br>
+        <label>Last Name: </label>
+        <input type="text" name="last_name" value="{{ last_name }}"></input><br>
         <input type="submit" name="submit" value="Register">
     </form>
 {% endblock %}
