@@ -2,17 +2,17 @@
 var graph, story,
     createGraph = function (jsonF, gcontainer, icontainer) {
         "use strict";
-        story = new SigmaLayout("");
+        story = new SigmaLayout(jsonF);
         
-        sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
-            if (this.edgesArray.length>0){
-            var lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
-            return Number.parseInt(lastEdgeID.substr(1));
+        sigma.classes.graph.addMethod('getLastEdgeInedx', function () {
+            if (this.edgesArray.length > 0) {
+                var lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
+                return Number.parseInt(lastEdgeID.substr(1));
             }
             return 0;
         });
         sigma.classes.graph.addMethod('getLastNodeIndex', function (){
-            if (this.nodesArray.length > 0){
+            if (this.nodesArray.length > 0) {
             var lastNodeID = this.nodesArray[this.nodesArray.length-1].id;
             return Number.parseInt(lastNodeID.substr(1));
                 }
@@ -48,6 +48,7 @@ var graph, story,
                 label: '',
                 content: ''
             });
+            updateOptions();
             graph.refresh();
         });
     },
@@ -88,7 +89,6 @@ var graph, story,
             setTargets(targets, node);
             nodeLabel.addEventListener('change', function(e){
                 node.label = nodeLabel.value;
-                updateOptions();
                 graph.refresh();
             });
             contentArea.value = node.content;
@@ -99,6 +99,7 @@ var graph, story,
         });
         graph.bind('doubleClickNode', function (e){
             graph.graph = graph.graph.dropNode(e.data.node.id);
+            updateOptions();
             graph.refresh();
         });
         
@@ -116,8 +117,10 @@ var graph, story,
         Edges().forEach(function (edge){
             if(edge.source === node.id){
                 createChoiceElements();
+                
                 tNode.value = Nodes(edge.target).id;
                 tNode.name = edge.id;
+                
                 changeEdges(tNode);
                 
                 sChoice.value = edge.choice;
@@ -125,7 +128,6 @@ var graph, story,
                 changeChoice(sChoice);
                 appendChoiceElements();
             }
-        updateOptions();
         });
         addBtn = document.createElement("div");
         addBtn.innerHTML = "+";
@@ -135,8 +137,8 @@ var graph, story,
             tNode.value = '';
             changeEdges(tNode);
             appendChoiceElements();
-            cont.insertBefore(cont.lastChild, addBtn);
             updateOptions();
+            cont.insertBefore(cont.lastChild, addBtn);
         });
         cont.appendChild(addBtn);
         
@@ -153,9 +155,19 @@ var graph, story,
             tNode = document.createElement("select");
             tNode.class = "tNodes";
             
-            tChoices.forEach(function (o){
-                var op = o.cloneNode(true);
-                tNode.add(op);
+            tChoices = [];
+            let op = document.createElement("option");
+            op.text = "...";
+            op.value = '-1';
+            tChoices.push(op);
+            Nodes().forEach(function (n){
+                let op = document.createElement("option");
+                op.text = n.label;
+                op.value = n.id;
+            });
+            tChoices.forEach(function (o, i){
+                let op = o.cloneNode(true);
+                tNode.appendChild(op, i);
             });
             
             sChoice = document.createElement("input");
@@ -168,7 +180,7 @@ var graph, story,
             endSpan.innerHTML = "is this an Ending Choice";
             
             endBox.addEventListener('change', function (e){
-                var id = e.path[1].getElementsByTagName("select").name;
+                var id = e.target.parentElement.getElementsByTagName("select").name;
                 if(e.srcElement.checked){
                     story.endings.push(Edges(id));
                     graph.graph.dropEdge(id);
@@ -183,11 +195,12 @@ var graph, story,
             removeBtn.innerHTML = "X";
             removeBtn.style = "color: red; background-color: black;";
             removeBtn.addEventListener("click", function(e){
-                var eID = e.path[1].getElementsByTagName("select")[0].name;
+                var eID = e.target.parentElement.getElementsByTagName("select")[0].name;
                 if(eID){
                     graph.graph.dropEdge(eID);
                     }
                 cont.removeChild(this.parentElement);
+                updateOptions();
                 graph.refresh();
             });
         }
@@ -204,27 +217,29 @@ var graph, story,
         }
         function changeEdges(selected){
                  tNode.addEventListener('change', function (e){
-                    var oldEdge, newEdge, lastEdgeInedx;
+                    if (selected.value !== -1){
+                    var oldEdge, newEdge, lastEdgeInedx, form = document.getElementsByTagName("form")[0], pDiv = e.target.parentElement ;
                     lastEdgeInedx = graph.graph.getLastEdgeInedx();
-                    oldEdge = Edges(selected.name) || new Edge(-1);
+                    oldEdge = Edges(selected.name) || new Edge(0);
                     newEdge = new Edge(lastEdgeInedx+1);
                     newEdge.id = 'e' + Number.parseInt(lastEdgeInedx+1);
-                    newEdge.choice = oldEdge.choice || e.path[1].getElementsByTagName("input")[0].value;
-                    newEdge.count = oldEdge.count || 0;
-                    newEdge.end = oldEdge.end || false;
+                    newEdge.choice = oldEdge.choice || pDiv.getElementsByTagName("input")[0].value;
+                    newEdge.end = oldEdge.end;
                     newEdge.type = oldEdge.type || "curvedArrow";
-                    newEdge.source = e.path[3].id || '';
+                    newEdge.source = form.id || '';
                     newEdge.target = selected.value || '';
                     selected.name = newEdge.id;
-                    if(Edges(oldEdge.id)){graph.graph = graph.graph.dropEdge(oldEdge.id);}
-                    graph.graph = graph.graph.addEdge(newEdge);
-                    updateOptions();
+                    if(Edges(oldEdge.id)){
+                        graph.graph = graph.graph.dropEdge(oldEdge.id);
+                    }
+                        graph.graph = graph.graph.addEdge(newEdge);
                     graph.refresh();
+                    }
                 });
         }
         function changeChoice(choice){
             choice.addEventListener('change',function (e){
-                var E = Edges(e.path[1].getElementsByTagName("select")[0].name);
+                let E = Edges(e.target.parentElement.getElementsByTagName("select")[0].name);
                 if(E){ E.choice = e.srcElement.value;}
                 graph.refresh();
             });
@@ -232,27 +247,22 @@ var graph, story,
 
 }
         function updateOptions(){
-            var Choices = [];
-            graph.graph.nodes().forEach(function (n, i){
-            var op = document.createElement("option");
-            op.text = n.label;
-            op.value = n.id;
-            Choices.push(op);
-        });
-            var selects = document.getElementsByTagName("select");
-            for (var i = 0; i< selects.length ; i++){
+            var selects = document.getElementsByTagName("select"), choices = [];
+            graph.graph.nodes().forEach(function (n){
+                let op = document.createElement("option");
+                op.text = n.label;
+                op.value = n.id;
+                choices.push(op);
+            });
+            for (let i = 0; i < selects.length; i++){
+                let selectedIndec = selects[i].selectedIndex;
                 while(selects[i].firstChild){
                     selects[i].removeChild(selects[i].firstChild);
                 }
+                for (let j = 0; j < choices.length; j++){
+                    let opt = choices[j].cloneNode(true);
+                    selects[i].appendChild(opt, j);
+                }
+                selects[i].selectedIndex = selectedIndec;
             }
-            console.log(Choices);
-            if(selects.length>0){
-            for (var i = 0; i < selects.length; i++){
-                Choices.forEach(function (o, x){
-                    var op = o.cloneNode(true);
-                    selects[i].appendChild(op, x);
-                });
-            }
-            console.log(selects);
-        }
     }
