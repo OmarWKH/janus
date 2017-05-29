@@ -3,16 +3,38 @@
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='graph.css') }}">
 
+      <style type="text/css">
+      html{
+          height: 100%;
+          width: 100%;
+      }
+    body{
+        display:flex;
+        flex-flow: column;
+        height: inherit;
+        width:inherit;
+    }
+      #graph {
+        height: 50%;
+        width: 100%;
+        }
+      #infoBox {
+        height: 50%;
+        width: 100%;
+      }
+    </style>
+
     <script src="{{ url_for('static', filename='sigma/sigma.min.js') }}"></script>
     <script src="{{ url_for('static', filename='sigma/plugins/sigma.renderers.parallelEdges.min.js') }}"></script>
     <script src="{{ url_for('static', filename='sigma/plugins/sigma.plugins.dragNodes.min.js') }}"></script>    
     <script type="text/javascript" src="{{ url_for('static', filename='sigmaGraph.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='sigma_layout.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='json_layout.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='') }}"></script>
 
     <script type="text/javascript">
-        init({{ story.id|e }}, {{ story.json|tojson }}, 'graph', 'infoBox');
+        window.addEventListener("load", function(){
+            init({{ story._id|e }}, {{ story.json|tojson }}, 'graph', 'infoBox');
+        });
     </script>
 {% endblock %}
 

@@ -1,6 +1,8 @@
 
 var graph, story,
     init = function (storyID, jsonF, gC, iC){
+        gC = document.getElementById(gC);
+        iC = document.getElementById(iC);
         createGraph(jsonF, gC, iC);
     },
     createGraph = function (jsonF, gcontainer, icontainer) {
@@ -11,7 +13,7 @@ var graph, story,
             story = graph.graph;
             let json = new Story(story);
             let params = JSON.stringify(json);
-            httpGetAsync(url, params, init);
+            httpPostAsync(url, params);
         });
         sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
             if (this.edgesArray.length>0){
@@ -78,7 +80,7 @@ var graph, story,
             story = graph.graph;
             let json = new Story(story);
             let params = JSON.stringify(json);
-            httpGetAsync(url, params, init);
+            httpPostAsync(url, params);
         });
         
         nLabel.innerHTML = "Node Label";
@@ -291,7 +293,7 @@ var graph, story,
         }
     }
 
-function httpPostAsync(url, params, callback) {
+function httpPostAsync(url, params, callback=nullFallback) {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         const done = 4;
@@ -308,4 +310,9 @@ function httpPostAsync(url, params, callback) {
     console.log("RequestHeader Set.");
     xmlHttp.send(params);
     console.log("Request Sent.");
+}
+
+function nullFallback(status, responseText) {
+    console.log("response status: " + status);
+    console.log("response text: " + responseText);
 }
