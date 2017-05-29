@@ -3,8 +3,13 @@
 {% block body %}
     <ul>
     	{% for story in stories %}
-    		<li><a href="{{ url_for('play_story', story_id=story._id|e) }}">
-    			{{ story._id|e }}: {{ story.title }}: {{ story.author.username }}<br>
+    		<li>
+    			<a href="{{ url_for('play_story', story_id=story._id|e) }}">
+    				{{ story._id|e }}: {{ story.title }}
+    			</a><br>
+    			<a href="{{ url_for('profile', username=story.author.username) }}">
+    				{{ story.author.username }}
+    			</a><br>
     			{{ story.published }}<br>
     			<img src="{{ url_for('send_image', name=story.image_name) }}">
     		</a></li>

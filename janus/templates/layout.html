@@ -19,8 +19,13 @@
             <li><a href="news.html">News</a></li>
         </ul>
         <div class="btn-xs">
-            <a href="{{ url_for('register')}}">Register</a>
-            <a href="{{ url_for('login')}}">Log in</a>
+	        {% if current_user.is_authenticated %}
+	        	<a href="{{ url_for('profile', username=current_user.username) }}">{{ current_user.username }}</a>
+	        	<a href="{{ url_for('logout')}}">Log out</a>
+	        {% else %}
+	            <a href="{{ url_for('register')}}">Register</a>
+	            <a href="{{ url_for('login')}}">Log in</a>
+	        {% endif %}
         </div>
     </div>
 	{% with messages = get_flashed_messages() %}
