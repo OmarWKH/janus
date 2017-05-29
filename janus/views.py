@@ -60,6 +60,32 @@ def create_story():
 	
 	return render_template('create.html')
 
+@app.route('/edit_story/<_id>')
+@login_required
+def edit_story(_id):
+	story = Story.query.get_or_404(_id)
+	if story.author == current_user:
+		return render_template('edit_story.html', story=story)
+	abort(404)
+
+@login_required
+@app.route('/save_story', methods=['POST'])
+def save_story():
+	story_id = request.values['id']
+	story_json = request.values['json']
+	
+	story = Story.query.get_or_404(_id)
+	if story.author == current_user:
+		story.json = story_json
+		db.session.add(story)
+		db.session.commit()
+
+		created_status = 201
+		body = ''
+		return (body, created_status)
+	
+	abort(404)
+
 @app.route('/play/<story_id>')
 def play_story(story_id):
 	story = Story.query.get_or_404(story_id)

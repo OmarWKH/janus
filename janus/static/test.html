@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--START SIGMA IMPORTS -->
+<script src="./sigma/sigma.min.js"></script>
+<script src="./sigma/plugins/sigma.renderers.parallelEdges.min.js"></script>
+<script src="./sigma/plugins/sigma.plugins.dragNodes.min.js"></script>    
+<title>Basic sigma.js example</title>
+<script type="text/javascript" src="./sigmaGraph.js"></script>
+<script type="text/javascript" src="./sigma_layout.js"></script>
+<script type="text/javascript" src="./json_layout.js"></script>
+<script type="text/javascript" src="test.js"></script>
+  <style type="text/css">
+      html{
+          height: 100%;
+          width: 100%;
+      }
+    body{
+        display:flex;
+        flex-flow: column;
+        height: inherit;
+        width:inherit;
+    }
+      #json_ting {
+        height: 50%;
+        width: 100%;
+        }
+      #cont {
+        height: 50%;
+        width: 100%;
+      }
+    </style>
+</head>
+<body onload="test()">
+    <div id="json_ting" tabindex="1"></div>
+    <div id="cont" tabindex="1"></div>
+    
+</body>
+</html>
