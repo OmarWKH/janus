@@ -161,6 +161,10 @@ def save_checkpoints():
 def send_image(name):
 	return send_from_directory(app.config['IMAGE_FOLDER'], name)
 
+@app.route('/static/<name>')
+def send_static(name):
+	return send_from_directory(app.static_folder, name)
+
 ## Users
 @app.route('/register', methods=['GET', 'POST'])
 def register():
