@@ -8,7 +8,9 @@ var graph, story, story_id
     },
     createGraph = function (jsonF, gcontainer, icontainer) {
         "use strict";
-        story = new SigmaLayout(jsonF);
+        story = new SigmaLayout(JSON.parse(jsonF));
+        console.log("json: " + jsonF);
+        console.log(story);
         document.addEventListener('unload', function(e){
             let url = window.location.protocol + "//" + window.location.host + "/save_story"
             story = graph.graph;

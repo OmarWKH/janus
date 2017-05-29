@@ -20,6 +20,7 @@ function Edge(j) {
 }
 function readNodes(events) {
     "use strict";
+    console.log("readNodes events: " + events);
     var nodes = [];
     if (events)
         events.forEach(function (event, index) {
@@ -66,8 +67,10 @@ function readEdges(events) {
 
 function SigmaLayout(s) {
     "use strict";
-    s = s.Story || "";
+    s = s || "";
+    console.log("s: " + s);
     this.nodes = readNodes(s.Events);
+    console.log("n: " + this.nodes);
     var E = readEdges(s.Events);
     this.edges = E[0] || [];
     this.endings = E[1] || [];
