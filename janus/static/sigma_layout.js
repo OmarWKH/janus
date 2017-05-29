@@ -46,6 +46,7 @@ function readEdges(events) {
                     edge.source = 'n' + event.Event_id;
                     edge.target = 'n' + branch.Next_event;
                     edge.id = 'e' + Redges.length;
+                    edge.end = branch.end;
                     Redges.push(edge);
                 } else {
                     Hedge = new Edge(jndex);
@@ -53,6 +54,7 @@ function readEdges(events) {
                     Hedge.source = 'n' + event.Event_id;
                     Hedge.target = 'n' + branch.Next_event;
                     Hedge.id = 'e' + edges.length;
+                    Hedge.end = true;
                     Hedges.push(Hedge);
                 }
             });
