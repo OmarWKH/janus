@@ -15,10 +15,10 @@ function Choice(edge) {
 function setEvents(graph) {
     "use strict";
     var Events = [];
-    graph.nodes.forEach(function (node) {
+    graph.nodes().forEach(function (node) {
         Events.push(new Event(node));
     });
-    graph.edges.forEach(function (edge) {
+    graph.edges().forEach(function (edge) {
         var  event = Events[Number.parseInt(edge.source.substr(1))];
         event.Default_branch.push(new Choice(edge));
     });

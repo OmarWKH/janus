@@ -5,8 +5,14 @@ var graph, story,
     },
     createGraph = function (jsonF, gcontainer, icontainer) {
         "use strict";
-        story = new SigmaLayout("");
-        
+        story = new SigmaLayout(jsonF);
+        document.addEventListener('unload', function(e){
+            let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints"
+            story = graph.graph;
+            let json = new Story(story);
+            let params = JSON.stringify(json);
+            httpGetAsync(url, params, init);
+        });
         sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
             if (this.edgesArray.length>0){
             var lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
@@ -57,14 +63,23 @@ var graph, story,
     
     createInfoBox = function (icontainer){
         
-        var nodeInfoForm, nLabel, nodeLabel, targets, ctaLabel, contentArea;
+        var nodeInfoForm, nLabel, nodeLabel, targets, ctaLabel, contentArea, saveBtn;
         nodeInfoForm = document.createElement("form");
         nLabel = document.createElement("span");
         nodeLabel = document.createElement("input");
         targets = document.createElement("div");
         ctaLabel = document.createElement("span");
         contentArea = document.createElement("textarea");
-
+        saveBtn = document.createElement("button");
+        
+        saveBtn.value = "Save";
+        saveBtn.addEventListener('click', function (e){
+            let url = window.location.protocol + "//" + window.location.host + "/save_checkpoints"
+            story = graph.graph;
+            let json = new Story(story);
+            let params = JSON.stringify(json);
+            httpGetAsync(url, params, init);
+        });
         
         nLabel.innerHTML = "Node Label";
         nodeLabel.type = "text";
@@ -94,6 +109,8 @@ var graph, story,
                 updateOptions();
                 graph.refresh();
             });
+            story = graph.graph;
+            
             contentArea.value = node.content;
             contentArea.addEventListener('change', function(e){
                 node.content = contentArea.value;
@@ -128,18 +145,18 @@ var graph, story,
                 changeChoice(sChoice);
                 appendChoiceElements();
             }
-        story.endings.forEach(function (edge){
-                console.log("f");
-                createChoiceElements();
-                tNode.value = Nodes(edge.target).id;
-                tNode.name = edge.id;
-                changeEdges(tNode);
-                
-                sChoice.value = edge.choice;
-                sChoice.name = edge.id;
-                changeChoice(sChoice);
-                appendChoiceElements();
-        });
+//        story.endings.forEach(function (edge){
+//                console.log("f");
+//                createChoiceElements();
+//                tNode.value = Nodes(edge.target).id || '';
+//                tNode.name = edge.id || '';
+//                changeEdges(tNode);
+//                
+//                sChoice.value = edge.choice || '';
+//                sChoice.name = edge.id || '';
+//                changeChoice(sChoice);
+//                appendChoiceElements();
+//        });
         updateOptions();
         });
         addBtn = document.createElement("div");
