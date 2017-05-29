@@ -6,7 +6,7 @@ import tempfile, os
 from werkzeug import generate_password_hash, check_password_hash
 from datetime import datetime
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # costly feature that is not used
 db = SQLAlchemy(app)
 
