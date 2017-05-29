@@ -43,7 +43,7 @@ def create_story():
 		db.session.add(new_story)
 		db.session.commit()
 		flash("Created story")
-		return redirect(url_for('edit_story', _id=new_story._id))
+		return redirect(url_for('list_stories'))
 	
 	action = url_for('create_story')
 	return render_template('create.html', story=None, checked='')
@@ -64,7 +64,8 @@ def edit_story_info(_id):
 		db.session.add(story)
 		db.session.commit()
 		flash("Edited story info")
-		return redirect(url_for('edit_story', _id=story._id))
+		# return redirect(url_for('edit_story', _id=story._id))
+		return redirect(url_for('list_stories'))
 	elif request.method	== 'GET':
 		story = Story.query.get_or_404(_id)
 		checked = ''
