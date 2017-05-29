@@ -8,21 +8,6 @@ from datetime import datetime
 import os
 from sqlalchemy.exc import IntegrityError
 
-## Tests
-@app.route('/playtest')
-def playtest():
-	return render_template('playtest.html')
-
-@app.route('/savetest')
-def savetest():
-	return \
-		'''
-		<form method="post" action="save_checkpoints">
-		<input type="text" name="saves" value="{&quot;1&quot;:&quot;1&quot;, &quot;2&quot;:&quot;2&quot;}">
-		<input type="submit" name="submit">
-		</form>
-		'''
-
 ## Main
 @app.route('/list')
 def list_stories():
