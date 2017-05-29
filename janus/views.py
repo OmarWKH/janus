@@ -99,6 +99,18 @@ def save_story():
 	
 	abort(404)
 
+@login_required
+@app.route('/delete_story/<_id>')
+def delete_story(_id):
+	story = Story.query.get_or_404(_id)
+	if story.author != current_user:
+		abort(404)
+
+	db.session.delete(story)
+	db.session.commit()
+	flash("Deleted story")
+	return redirect(url_for('profile', username=current_user.username))
+
 @app.route('/play/<story_id>')
 def play_story(story_id):
 	story = Story.query.get_or_404(story_id)
