@@ -43,7 +43,7 @@ function player(story_id, story_json, db_save) {
     }
 
     function checkSaveFile(cookie_save, db_save_string){
-        let load;
+        let load = story.Events[0].Event_id;
         if( cookie_save !== null && db_save !== null) {
             let db_save = JSON.parse(db_save_string);
             console.log(cookie_save);
@@ -158,20 +158,20 @@ function player(story_id, story_json, db_save) {
     this.load_event = function(id){
         console.log("story id: " + story.id);
         console.log("event id: " + id);
-        let event_id = story.Story.Events[id].Event_id;
-        let event_title = story.Story.Events[id].Event_title;
+        let event_id = story.Events[id].Event_id;
+        let event_title = story.Events[id].Event_title;
         saveProg(event_id);
         document.getElementById("E_data").innerHTML =
             "<h4>" + event_id + ":" + event_title + "</h4>";
 
-        let event_text = story.Story.Events[id].Event_Content;
+        let event_text = story.Events[id].Event_Content;
         console.log(event_text);
         document.getElementById("E_text").innerHTML =
             "<p>" + event_text + "</p>";
 
         document.getElementById("E_choices").innerHTML = "";
-        console.log(story.Story.Events[id].Default_branch);
-        let branches = story.Story.Events[id].Default_branch;
+        console.log(story.Events[id].Default_branch);
+        let branches = story.Events[id].Default_branch;
         for(i = 0; i < branches.length; i++){
             console.log(branches[i]);
             choice(branches[i]);

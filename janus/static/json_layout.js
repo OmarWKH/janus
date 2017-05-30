@@ -20,7 +20,9 @@ function setEvents(graph) {
     });
     graph.edges().forEach(function (edge) {
         var  event = Events[Number.parseInt(edge.source.substr(1))];
-        event.Default_branch.push(new Choice(edge));
+        if (event) {
+            event.Default_branch.push(new Choice(edge));
+        }
     });
     return Events;
 }

@@ -1,3 +1,5 @@
+You must run on Chrome for some features to work.
+
 # Structure
 - janus: Application code
 -- static: CSS, JS, and images

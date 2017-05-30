@@ -1,5 +1,5 @@
 
-var graph, story, story_id
+var graph, story, story_id;
     init = function (storyID, jsonF, gC, iC){
         gC = document.getElementById(gC);
         iC = document.getElementById(iC);
@@ -13,7 +13,7 @@ var graph, story, story_id
         console.log(story);
         document.addEventListener('unload', function(e){
             let url = window.location.protocol + "//" + window.location.host + "/save_story"
-            story = graph.graph;
+            let story = graph.graph;
             let json = new Story(story);
             let params = "json="+JSON.stringify(json);
             params = params + "&id="+story_id;
@@ -80,7 +80,7 @@ var graph, story, story_id
         
         saveBtn.addEventListener('click', function (e){
             let url = window.location.protocol + "//" + window.location.host + "/save_story"
-            story = graph.graph;
+            let story = graph.graph;
             let json = new Story(story);
             let params = "json="+JSON.stringify(json);
             params = params + "&id="+story_id;
@@ -115,7 +115,7 @@ var graph, story, story_id
                 updateOptions();
                 graph.refresh();
             });
-            story = graph.graph;
+            let story = graph.graph;
             
             contentArea.value = node.content;
             contentArea.addEventListener('change', function(e){
@@ -207,14 +207,16 @@ var graph, story, story_id
             
             endBox.addEventListener('change', function (e){
                 var id = e.path[1].getElementsByTagName("select")[0].name;
+                console.log(id);
+                console.log(story);
                 if(e.srcElement.checked){
                     story.endings.push(Edges(id));
                     graph.graph.dropEdge(id);
                 }
                 else{
                     console.log(story.getHedge(id));
-//                    graph.graph.addEdge();
-//                    story.removeHedge(id);
+                    graph.graph.addEdge();
+                    story.removeHedge(id);
                 }
                 graph.refresh();
             })
@@ -255,6 +257,12 @@ var graph, story, story_id
                     newEdge.source = e.path[3].id || '';
                     newEdge.target = selected.value || '';
                     selected.name = newEdge.id;
+                    
+                    console.log("new|old:")
+                    console.log(selected);
+                    console.log(newEdge);
+                    console.log(oldEdge);
+
                     if(Edges(oldEdge.id)){graph.graph = graph.graph.dropEdge(oldEdge.id);}
                     graph.graph = graph.graph.addEdge(newEdge);
                     updateOptions();
@@ -282,7 +290,9 @@ var graph, story, story_id
             Choices.push(op);
         });
             var selects = document.getElementsByTagName("select");
+            let selectedValues = Array();
             for (var i = 0; i< selects.length ; i++){
+                selectedValues[i] = selects[i].value;
                 while(selects[i].firstChild){
                     selects[i].removeChild(selects[i].firstChild);
                 }
@@ -292,7 +302,11 @@ var graph, story, story_id
                 Choices.forEach(function (o, x){
                     var op = o.cloneNode(true);
                     selects[i].appendChild(op, x);
+                    if (op.value == selectedValues[i]) {
+                        selects[i].value = selectedValues[i];
+                    };
                 });
+
             }
         }
     }

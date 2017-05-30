@@ -2,14 +2,13 @@
 
 {% block body %}
     <form id="createStoryForm" method="post" enctype="multipart/form-data" action="{{ action }}">
-        <textarea name="story_json">{ "Story": {
-        "Events" : [
-                { "Event_id" : "0",
+        <textarea name="story_json">{ "Events" : [
+                { "Event_id" : "100",
                     "Event_title" : "Pain",
                     "Event_Content" : "Here eyes … Full of tears, She’s Gasping for air now!.",
                     "Default_branch" : [
                                 {"choice" : "You ran to her out of chivalry to comfort her.", "Next_event": "1"},
-                                {"choice" : "You said “there there’, with the tip of your tongue, and continued your way.", "Next_event": "0"},
+                                {"choice" : "You said “there there’, with the tip of your tongue, and continued your way.", "Next_event": "100"},
                                                                 {"choice": "You just … left.", "Next_event": "2"}
                                  ]
                  
@@ -19,7 +18,7 @@
                     "Event_title" : "EVENT_TITLE_1",
                                     "Event_Content" : "TEXT_2",
                     "Default_branch" :  [ 
-                                { "choice" : "Choice_Text", "Next_event": "0" },
+                                { "choice" : "Choice_Text", "Next_event": "100" },
                                 { "choice" : "Choice_Text_2", "Next_event": "1" }
                                     ]
                 },
@@ -27,9 +26,9 @@
                     "Event_title" : "Anger",
                                     "Event_Content" : "Behind your back, weird screeches started popping out, the crying stopped, the screeches transformed into crackling of teeth, painful.  The sound is getting closer and closer to you.",
                     "Default_branch" :  [ 
-                                { "choice" : "You ran like you’ve never ran before.", "Next_event": "0" },
+                                { "choice" : "You ran like you’ve never ran before.", "Next_event": "100" },
                                 { "choice" : "You turned cowardly, yet curiously!.", "Next_event": "1" },
-                                                                { "choice": "You grabbed a stone from the ground beneath you, and turned to face the demon!.", "Next_event": "0"},
+                                                                { "choice": "You grabbed a stone from the ground beneath you, and turned to face the demon!.", "Next_event": "100"},
                                                                 { "choice" : "You kept walking as if nothing’s happened.", "Next_event": "3" }
                                     ]
                                 },
@@ -42,9 +41,6 @@
                                     ]
                                 }
                      ]
-        }
-
-
         }</textarea>
         <label>Title: </label><input type="text" name="title" value="{{ story.title }}">
         <label>Publish? </label><input type="checkbox" name="published" {{ checked }}>
