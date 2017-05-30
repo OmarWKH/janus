@@ -8,7 +8,7 @@ if %ERRORLEVEL% neq 0 (
 	echo   Make sure you are using the desired pytohn venv before installing.
 	echo  To create a virtual environment, if desired: "https://docs.python.org/3/tutorial/venv.html"
 ) else (
-	set FLASK_APP=setup.py
+	set FLASK_APP=app.py
 	set FLASK_DEBUG=1
 	flask run
 )
