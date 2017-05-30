@@ -5,6 +5,7 @@ from janus import app
 import tempfile, os
 from werkzeug import generate_password_hash, check_password_hash
 from datetime import datetime
+from sqlalchemy.exc import OperationalError
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # costly feature that is not used
@@ -86,6 +87,3 @@ class Save(db.Model):
 		super(Save, self).__init__(**kwargs)
 		self.story_id = story_id
 		self.data = data
-
-## Development stuff, to be removed
-db.create_all()
