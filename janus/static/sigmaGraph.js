@@ -8,7 +8,8 @@ var graph, story, story_id;
     },
     createGraph = function (jsonF, gcontainer, icontainer) {
         "use strict";
-        story = new SigmaLayout(JSON.parse(jsonF));
+        let jsonObj = JSON.parse(jsonF) || "";
+        story = new SigmaLayout(jsonObj);
         console.log("json: " + jsonF);
         console.log(story);
         console.log(story.endings);
