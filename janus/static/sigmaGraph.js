@@ -225,8 +225,8 @@ var graph, story, story_id;
                 }
                 else{
                     let restoredEdge = story.getHedge(id);
-                    let lastEdgeIndex = graph.graph.getLastEdgeInedx();
-                    restoredEdge.id = 'e' + Number.parseInt(lastEdgeInedx+1);
+                    let lastEdgeIndex = graph.graph.getLastEdgeInedx()+1;
+                    restoredEdge.id = 'e' + lastEdgeIndex;
                     restoredEdge.target = restoredEdge.source;
                     graph.graph.addEdge(restoredEdge);
                     selE.name = restoredEdge.id;
@@ -262,10 +262,10 @@ var graph, story, story_id;
         function changeEdges(selected){
                  tNode.addEventListener('change', function (e){
                     var oldEdge, newEdge, lastEdgeInedx;
-                    lastEdgeInedx = graph.graph.getLastEdgeInedx();
+                    lastEdgeInedx = graph.graph.getLastEdgeInedx()+1;
                     oldEdge = Edges(selected.name) || new Edge(0);
-                    newEdge = new Edge(lastEdgeInedx+1);
-                    newEdge.id = 'e' + Number.parseInt(lastEdgeInedx+1);
+                    newEdge = new Edge(lastEdgeInedx);
+                    newEdge.id = 'e' + lastEdgeInedx;
                     newEdge.choice = oldEdge.choice || e.target.parentElement.getElementsByTagName("input")[0].value;
                     newEdge.count = oldEdge.count || 3;
                     newEdge.end = oldEdge.end || false;
