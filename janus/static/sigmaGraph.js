@@ -23,15 +23,16 @@ var graph, story, story_id;
         });
         sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
             if (this.edgesArray.length>0){
-            var lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
+            let lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
             return Number.parseInt(lastEdgeID.substr(1));
             }
             return 0;
         });
         sigma.classes.graph.addMethod('getLastNodeIndex', function (){
+            
             if (this.nodesArray.length > 0){
-            var lastNodeID = this.nodesArray[this.nodesArray.length-1].id;
-            return Number.parseInt(lastNodeID.substr(1));
+            let lastNodeID = this.nodesArray[this.nodesArray.length-1].id;
+            return Number.parseInt(lastNodeID.substr(1))+1;
                 }
             return 0;
         });
@@ -57,8 +58,8 @@ var graph, story, story_id;
         var dragListener = sigma.plugins.dragNodes(graph, graph.renderers[0]);
 
         graph.bind('doubleClickStage', function (e){
-            var n = graph.graph.getLastNodeIndex()+1;
-            
+            let n = graph.graph.getLastNodeIndex()+1;
+            console.log(n);
             graph.graph.addNode({
                 id: 'n' + n,
                 size: 10,
@@ -162,7 +163,7 @@ var graph, story, story_id;
                 createChoiceElements();
                 tNode.value = edge.target || '';
                 tNode.name = edge.id;
-//                changeEdges(tNode);
+                changeEdges(tNode);
                 tNode.disabled = true;
                 endBox.checked = true;
                 sChoice.value = edge.choice || '';
@@ -217,9 +218,13 @@ var graph, story, story_id;
                 var selE = e.target.parentElement.getElementsByTagName("select")[0],
                     id = selE.name;
                 if(e.target.checked){
-                    let edge = Edges(id);
-                    graph.graph.dropEdge(id);
-                    edge.id = '-' + edge.id;
+                    let edge = Edges(id) || new Edge(Edges().length);
+                    if(Edges(id)){graph.graph.dropEdge(id);}
+                    let n = story.endings.length;
+                    edge.id = '-' + (edge.id || 'e' + n);
+                    edge.source = selE.parentElement.parentElement.parentElement.id;
+                    edge.target = '-1';
+                    edge.end = true;
                     story.endings.push(edge);
                     selE.disabled = true;
                     selE.name = edge.id;
@@ -229,6 +234,7 @@ var graph, story, story_id;
                     let lastEdgeIndex = graph.graph.getLastEdgeInedx()+1;
                     restoredEdge.id = 'e' + lastEdgeIndex;
                     restoredEdge.target = restoredEdge.source;
+                    restoredEdge.end = undefined;
                     graph.graph.addEdge(restoredEdge);
                     selE.name = restoredEdge.id;
                     selE.disabled = false;
@@ -242,12 +248,16 @@ var graph, story, story_id;
             removeBtn.style = "color: red; background-color: black;";
             removeBtn.addEventListener("click", function(e){
                 var eID = e.target.parentElement.getElementsByTagName("select")[0].name;
-                if(eID){
+                if(Edges(eID)){
                     graph.graph.dropEdge(eID);
-                    }
+                }
+                else{
+                    story.removeHedge(eID);    
+                }
                 cont.removeChild(this.parentElement);
                 graph.refresh();
             });
+            console.log(story.endings);
         }
         
         function appendChoiceElements(){
@@ -269,10 +279,10 @@ var graph, story, story_id;
                     newEdge.id = 'e' + lastEdgeInedx;
                     newEdge.choice = oldEdge.choice || e.target.parentElement.getElementsByTagName("input")[0].value;
                     newEdge.count = oldEdge.count || 3;
-                    newEdge.end = oldEdge.end || false;
+                    newEdge.end = oldEdge.end;
                     newEdge.type = oldEdge.type || "curvedArrow";
                     newEdge.source = e.target.parentElement.parentElement.parentElement.id || '';
-                    newEdge.target = selected.value || '';
+                    newEdge.target = selected.value || '-1';
                     selected.name = newEdge.id;
                     
                     console.log("new|old:")
@@ -348,6 +358,7 @@ function httpPostAsync(url, params, callback=nullFallback) {
     console.log("RequestHeader Set.");
     xmlHttp.send(params);
     console.log("Request Sent.");
+    console.log(JSON.stringify(new Story(graph.graph)));
 }
 
 function nullFallback(status, responseText) {
