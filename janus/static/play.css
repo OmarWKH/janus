@@ -1,0 +1,16 @@
+#E_choices button{
+    border:none;
+    display:inline-block;
+    outline:0;
+    padding:12px 24px;
+    vertical-align:middle;
+    overflow:hidden;
+    text-decoration:none;
+    color:#fff;
+    background-color:#f44336;
+    text-align:center;
+    cursor:pointer;
+    white-space:nowrap;
+    margin-bottom: 16px;
+    width: 100%
+}

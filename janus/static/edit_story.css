@@ -1,0 +1,20 @@
+html, body, .w3-main, main {
+    height: 100%;
+}
+main {
+    display: flex;
+    flex-flow: column;
+}
+#graph {
+    flex: 1;
+    flex-grow: 
+}
+#infoBox {
+    flex: 1;
+}
+#controls {
+    flex: 0.1;
+}
+#saveBtn {
+    width: 4em;
+}

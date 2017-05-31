@@ -1,0 +1,38 @@
+body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
+body {font-size:16px;}
+h3{text-align: center}
+.w3-quarter img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
+.w3-quarter img:hover{opacity:1}
+.left{text-align: left}
+
+/* Story grid */
+#stories {
+    display: grid;
+    grid-auto-flow: row;
+    grid-gap: 5px;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 0 auto;
+    width: 90%;
+}
+.story {
+    height: 200px;
+    width: 200px    ;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: silver;
+    display: grid;
+    /*justify-items: center;*/
+    align-content: space-around;
+    text-align: center;
+    color: #4a4444;
+}
+.story:hover {
+    background-blend-mode: overlay;
+}
+.story a {
+    background-color: rgba(244, 67, 54, 0.86);
+}
+.story a:hover {
+    background-color: rgb(244, 67, 54);
+}

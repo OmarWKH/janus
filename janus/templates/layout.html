@@ -4,36 +4,79 @@
 <head>
 	<title>Janus</title>
 	<meta charset="utf-8">
+	<link rel="stylesheet" href="{{ url_for('static', filename='w3.css') }}">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
 	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
+	<script>
+        // Script to open and close sidebar
+        function w3_open() {
+            document.getElementById("mySidebar").style.display = "block";
+            document.getElementById("myOverlay").style.display = "block";
+        }
+ 
+        function w3_close() {
+            document.getElementById("mySidebar").style.display = "none";
+            document.getElementById("myOverlay").style.display = "none";
+        }
+    </script>
+	
 	{% block head %}{%endblock%}
 </head>
 <body>
-	<div class="header">
-        <ul>
-            <li><a class="active" href="{{ url_for('list_stories')}}">Browse</a></li>
-            <li><a href="{{ url_for('create_story')}}">Create</a></li>
-        </ul>
-        <div class="btn-xs">
-	        {% if current_user.is_authenticated %}
-	        	<a href="{{ url_for('profile', username=current_user.username) }}">{{ current_user.username }}</a>
-	        	<a href="{{ url_for('logout')}}">Log out</a>
-	        {% else %}
-	            <a href="{{ url_for('register')}}">Register</a>
-	            <a href="{{ url_for('login')}}">Log in</a>
-	        {% endif %}
+    <!-- Sidebar/menu -->
+    <nav class="w3-sidebar w3-red w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;" id="mySidebar"><br>
+        <a href="javascript:void(0)" onclick="w3_close()" class="w3-button w3-hide-large w3-display-topleft" style="width:100%;font-size:22px">Close Menu</a>
+        <div class="w3-container w3-padding-64">
+            <h3><b>Janus</b></h3>
+            <sub>The home of text-based RPGs</sub>
         </div>
+        <div class="w3-bar-block">
+            <a href="{{ url_for('list_stories')}}" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
+            <a href="{{ url_for('create_story')}}" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Create Story</a> 
+            <br>
+            {% if current_user.is_authenticated %}
+	        	<a href="{{ url_for('profile', username=current_user.username) }}" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">{{ current_user.username }}</a>
+	        	<a href="{{ url_for('logout')}}" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Log out</a>
+	        {% else %}
+	            <a href="{{ url_for('register')}}" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Register</a>
+	            <a href="{{ url_for('login')}}" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Log in</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Top menu on small screens -->
+    <header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
+      <a href="javascript:void(0)" class="w3-button w3-red w3-margin-right" onclick="w3_open()">☰</a>
+      <span>Janus</span>
+    </header>
+
+    <!-- Overlay effect when opening sidebar on small screens -->
+    <div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay">
     </div>
-	{% with messages = get_flashed_messages() %}
-		{% if messages %}
-			<ul id="flashes">
-				{% for message in messages %}
-					<li>{{ message }}</li>
-				{% endfor %}
-			</ul>
-		{% endif %}
-	{% endwith %}
-	{% block body %}
-	{% endblock %}
+
+    <!-- !PAGE CONTENT! -->
+    <div class="w3-main" style="margin-left:340px;margin-right:40px">
+        <!-- Header -->
+        {% if title %}
+            <div class="w3-container" style="margin-top:80px" id="showcase">
+                <h2 class="w3-xxxlarge w3-text-red"><b>{{ title }}</b></h2>
+                <hr style="width:50px;border:5px solid red" class="w3-round">
+            </div>
+        {% endif %}
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul id="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+    	{% block body %}
+    	{% endblock %}
+    </div>
 </body>
 </html>

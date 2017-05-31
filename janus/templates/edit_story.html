@@ -1,27 +1,12 @@
-<!DOCTYPE html>
-
+<!--
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-  <style type="text/css">
-    
-    body{
-        display:flex;
-        flex-flow: column;
-        height: 95vh;
-        width:95vw;
-    }
-      #graph {
-        flex: 1;
-        }
-      #infoBox {
-        flex: 1;
-      }
-      #saveBtn {
-        width: 4em;
-      }
-    </style>
+-->
+{% extends 'layout.html' %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='edit_story.css') }}">
 
     <script src="{{ url_for('static', filename='sigma/sigma.min.js') }}"></script>
     <script src="{{ url_for('static', filename='sigma/plugins/sigma.renderers.parallelEdges.min.js') }}"></script>
@@ -35,14 +20,15 @@
             init({{ story._id|e }}, {{ story.json|tojson }}, 'graph', 'infoBox');
         });
     </script>
-</head>
-
-<body>
+{% endblock %}
+{% block body %}
+    <main>
     <div id="graph">
     </div>
     <div id="infoBox">
     </div>
-    <button id="saveBtn">Save</button> <a href="{{ url_for('list_stories') }}">Back</a>
-</body>
-
-</html>
+    <div id="controls">
+        <button id="saveBtn">Save</button>
+    </div>
+    </main>
+{% endblock %}
