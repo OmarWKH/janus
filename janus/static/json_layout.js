@@ -19,7 +19,15 @@ function setEvents(graph) {
         Events.push(new Event(node));
     });
     graph.edges().forEach(function (edge) {
-        var  event = Events[Number.parseInt(edge.source.substr(1))];
+        let  event = Events[Number.parseInt(edge.source.substr(1))];
+        if (event) {
+            event.Default_branch.push(new Choice(edge));
+        }
+    });
+    story.endings.forEach(function (edge){
+        let  event = Events[Number.parseInt(edge.source.substr(1))];
+        let n = graph.nodes().length;
+        edge.target = 'e'+ n;
         if (event) {
             event.Default_branch.push(new Choice(edge));
         }
@@ -30,6 +38,7 @@ function setEvents(graph) {
 function Story(graph) {
     "use strict";
     this.Events = setEvents(graph);
+    
 }
 
 

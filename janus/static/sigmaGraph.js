@@ -41,7 +41,8 @@ var graph, story, story_id;
                 defaultNodeColor: "#ec5148",
                 defaultLabelSize: 11,
                 doubleClickEnabled: false,
-                immutable: false
+                immutable: false,
+                minEdgeSize: 2
             },
             renderer: {
                 container: gcontainer,
@@ -49,6 +50,8 @@ var graph, story, story_id;
             }
             
         });
+        
+        console.log(JSON.stringify(new Story(graph.graph)));
         createInfoBox(icontainer);
         var dragListener = sigma.plugins.dragNodes(graph, graph.renderers[0]);
 
@@ -264,7 +267,7 @@ var graph, story, story_id;
                     newEdge = new Edge(lastEdgeInedx+1);
                     newEdge.id = 'e' + Number.parseInt(lastEdgeInedx+1);
                     newEdge.choice = oldEdge.choice || e.target.parentElement.getElementsByTagName("input")[0].value;
-                    newEdge.count = oldEdge.count || 0;
+                    newEdge.count = oldEdge.count || 3;
                     newEdge.end = oldEdge.end || false;
                     newEdge.type = oldEdge.type || "curvedArrow";
                     newEdge.source = e.target.parentElement.parentElement.parentElement.id || '';
@@ -313,7 +316,9 @@ var graph, story, story_id;
             if(selects.length>0){
             for (let i = 0; i < selects.length; i++){
                 let edge = graph.graph.edges(selects[i].name);
-                let selectedVal = edge.target || '-1';
+                
+                let selectedVal ='-1';
+                if(edge){selectedVal = edge.target};
                 Choices.forEach(function (o, x){
                     let op = o.cloneNode(true);
                     selects[i].appendChild(op, x);
