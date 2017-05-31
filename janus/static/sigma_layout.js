@@ -49,12 +49,12 @@ function readEdges(events) {
                     edge.id = 'e' + Redges.length;
                     edge.end = branch.end;
                     Redges.push(edge);
-                } else {
+                } else if(branch.end){
                     Hedge = new Edge(jndex);
                     Hedge.choice = branch.choice;
                     Hedge.source = 'n' + event.Event_id;
                     Hedge.target = 'n' + branch.Next_event;
-                    Hedge.id = 'e' + edges.length;
+                    Hedge.id = '-e' + Hedges.length;
                     Hedge.end = true;
                     Hedges.push(Hedge);
                 }
@@ -75,20 +75,23 @@ function SigmaLayout(s) {
     this.edges = E[0] || [];
     this.endings = E[1] || [];
     this.removeHedge = function (id){
-        endings.forEach(function (e){
-           if(e.id === id){
+        for (let i = 0; i < this.endings.length; i++){ 
+           if(this.endings[i].id === id){
+               this.endings.splice(i, 1);
                return true;
            }
-        });
+        }
         return false;
     }
-    this.getHedge = function(id){
-        this.endings.forEach(function (e){
-            if(e.id === id){
-               return e;
+    this.getHedge = function(eid){
+        let i = 0;
+        for (i = 0; i < this.endings.length; i++){
+            if(this.endings[i].id === eid){
+                break;
            }
-        });
-        return undefined;  
+        }
+        console.log(this.endings[i]);
+        return this.endings[i];
     }
 }
 

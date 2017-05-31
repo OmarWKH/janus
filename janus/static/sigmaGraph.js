@@ -11,6 +11,7 @@ var graph, story, story_id;
         story = new SigmaLayout(JSON.parse(jsonF));
         console.log("json: " + jsonF);
         console.log(story);
+        console.log(story.endings);
         document.addEventListener('unload', function(e){
             let url = window.location.protocol + "//" + window.location.host + "/save_story"
             let story = graph.graph;
@@ -48,7 +49,6 @@ var graph, story, story_id;
             }
             
         });
-
         createInfoBox(icontainer);
         var dragListener = sigma.plugins.dragNodes(graph, graph.renderers[0]);
 
@@ -151,20 +151,24 @@ var graph, story, story_id;
                 changeChoice(sChoice);
                 appendChoiceElements();
             }
-//        story.endings.forEach(function (edge){
-//                console.log("f");
-//                createChoiceElements();
-//                tNode.value = Nodes(edge.target).id || '';
-//                tNode.name = edge.id || '';
+            });
+        story.endings.forEach(function (edge){
+            if(edge.source === node.id){
+                let Es = story.endings;
+                createChoiceElements();
+                tNode.value = edge.target || '';
+                tNode.name = edge.id;
 //                changeEdges(tNode);
-//                
-//                sChoice.value = edge.choice || '';
-//                sChoice.name = edge.id || '';
-//                changeChoice(sChoice);
-//                appendChoiceElements();
-//        });
+                tNode.disabled = true;
+                endBox.checked = true;
+                sChoice.value = edge.choice || '';
+                sChoice.name = edge.id || '';
+                changeChoice(sChoice);
+                appendChoiceElements();
+                }
+            });
         updateOptions();
-        });
+        
         addBtn = document.createElement("div");
         addBtn.innerHTML = "+";
         addBtn.style = "color: green;";
@@ -206,25 +210,34 @@ var graph, story, story_id;
             endSpan.innerHTML = "is this an Ending Choice";
             
             endBox.addEventListener('change', function (e){
-                var id = e.path[1].getElementsByTagName("select")[0].name;
-                console.log(id);
-                console.log(story);
-                if(e.srcElement.checked){
-                    story.endings.push(Edges(id));
+                var selE = e.target.parentElement.getElementsByTagName("select")[0],
+                    id = selE.name;
+                if(e.target.checked){
+                    let edge = Edges(id);
                     graph.graph.dropEdge(id);
+                    edge.id = '-' + edge.id;
+                    story.endings.push(edge);
+                    selE.disabled = true;
+                    selE.name = edge.id;
                 }
                 else{
-                    console.log(story.getHedge(id));
-                    graph.graph.addEdge();
-                    story.removeHedge(id);
+                    let restoredEdge = story.getHedge(id);
+                    let lastEdgeIndex = graph.graph.getLastEdgeInedx();
+                    restoredEdge.id = 'e' + Number.parseInt(lastEdgeInedx+1);
+                    restoredEdge.target = restoredEdge.source;
+                    graph.graph.addEdge(restoredEdge);
+                    selE.name = restoredEdge.id;
+                    selE.disabled = false;
+                    story.removeHedge(restoredEdge.id);
                 }
                 graph.refresh();
-            })
+                setTargets(cont, node);
+            });
             removeBtn = document.createElement("span");
             removeBtn.innerHTML = "X";
             removeBtn.style = "color: red; background-color: black;";
             removeBtn.addEventListener("click", function(e){
-                var eID = e.path[1].getElementsByTagName("select")[0].name;
+                var eID = e.target.parentElement.getElementsByTagName("select")[0].name;
                 if(eID){
                     graph.graph.dropEdge(eID);
                     }
@@ -247,14 +260,14 @@ var graph, story, story_id;
                  tNode.addEventListener('change', function (e){
                     var oldEdge, newEdge, lastEdgeInedx;
                     lastEdgeInedx = graph.graph.getLastEdgeInedx();
-                    oldEdge = Edges(selected.name) || new Edge(-1);
+                    oldEdge = Edges(selected.name) || new Edge(0);
                     newEdge = new Edge(lastEdgeInedx+1);
                     newEdge.id = 'e' + Number.parseInt(lastEdgeInedx+1);
-                    newEdge.choice = oldEdge.choice || e.path[1].getElementsByTagName("input")[0].value;
+                    newEdge.choice = oldEdge.choice || e.target.parentElement.getElementsByTagName("input")[0].value;
                     newEdge.count = oldEdge.count || 0;
                     newEdge.end = oldEdge.end || false;
                     newEdge.type = oldEdge.type || "curvedArrow";
-                    newEdge.source = e.path[3].id || '';
+                    newEdge.source = e.target.parentElement.parentElement.parentElement.id || '';
                     newEdge.target = selected.value || '';
                     selected.name = newEdge.id;
                     
@@ -271,7 +284,7 @@ var graph, story, story_id;
         }
         function changeChoice(choice){
             choice.addEventListener('change',function (e){
-                var E = Edges(e.path[1].getElementsByTagName("select")[0].name);
+                var E = Edges(e.target.parentElement.getElementsByTagName("select")[0].name);
                 if(E){ E.choice = e.srcElement.value;}
                 graph.refresh();
             });
@@ -279,34 +292,35 @@ var graph, story, story_id;
 
 }
         function updateOptions(){
-            var Choices = [];
-            var opB = document.createElement("option");
+            let Choices = [];
+            let opB = document.createElement("option");
             opB.text = '...';
+            opB.value = '-1';
             Choices.push(opB);
             graph.graph.nodes().forEach(function (n, i){
-            var op = document.createElement("option");
+            let op = document.createElement("option");
             op.text = n.label;
             op.value = n.id;
             Choices.push(op);
         });
-            var selects = document.getElementsByTagName("select");
-            let selectedValues = Array();
-            for (var i = 0; i< selects.length ; i++){
-                selectedValues[i] = selects[i].value;
+            let selects = document.getElementsByTagName("select");
+            
+            for (let i = 0; i< selects.length ; i++){
                 while(selects[i].firstChild){
                     selects[i].removeChild(selects[i].firstChild);
                 }
             }
             if(selects.length>0){
-            for (var i = 0; i < selects.length; i++){
+            for (let i = 0; i < selects.length; i++){
+                let edge = graph.graph.edges(selects[i].name);
+                let selectedVal = edge.target || '-1';
                 Choices.forEach(function (o, x){
-                    var op = o.cloneNode(true);
+                    let op = o.cloneNode(true);
                     selects[i].appendChild(op, x);
-                    if (op.value == selectedValues[i]) {
-                        selects[i].value = selectedValues[i];
-                    };
+                    if (op.value === selectedVal) {
+                        selects[i].selectedIndex = x;
+                    }
                 });
-
             }
         }
     }
