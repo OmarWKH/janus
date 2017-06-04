@@ -1,346 +1,103 @@
 
-var graph, story, story_id;
-    init = function (storyID, jsonF, gC, iC){
-        gC = document.getElementById(gC);
-        iC = document.getElementById(iC);
-        story_id = storyID;
-        createGraph(jsonF, gC, iC);
-    },
-    createGraph = function (jsonF, gcontainer, icontainer) {
-        "use strict";
-        let jsonObj = JSON.parse(jsonF) || "";
-        story = new SigmaLayout(jsonObj);
-        console.log("json: " + jsonF);
-        console.log(story);
-        console.log(story.endings);
-        document.addEventListener('unload', function(e){
-            let url = window.location.protocol + "//" + window.location.host + "/save_story"
-            let story = graph.graph;
-            let json = new Story(story);
-            let params = "json="+JSON.stringify(json);
-            params = params + "&id="+story_id;
-            httpPostAsync(url, params);
-        });
-        sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
-            if (this.edgesArray.length>0){
-            let lastEdgeID = this.edgesArray[this.edgesArray.length-1].id;
-            return Number.parseInt(lastEdgeID.substr(1));
-            }
-            return 0;
-        });
-        sigma.classes.graph.addMethod('getLastNodeIndex', function (){
-            
-            if (this.nodesArray.length > 0){
-            let lastNodeID = this.nodesArray[this.nodesArray.length-1].id;
-            return Number.parseInt(lastNodeID.substr(1))+1;
+var graph, story, story_id, ibox,
+init = function (storyID, jsonF, gC, iC){
+    gC = document.getElementById(gC);
+    iC = document.getElementById(iC);
+    story_id = storyID;
+    createSigmaInstance(jsonF, gC, iC);
+},
+createSigmaInstance = function (jsonF, gcontainer, icontainer) {
+    "use strict";
+    let jsonObj = JSON.parse(jsonF) || "";
+    story = new SigmaLayout(jsonObj);
+    sigma.classes.graph.addMethod('getLastEdgeInedx', function(){
+            let maxEdgeId = 0;
+            this.edgesArray.forEach(function(edge){
+                if (Number.parseInt(edge.id.substr(1)) > maxEdgeId){
+                    maxEdgeId = Number.parseInt(edge.id.substr(1));
                 }
-            return 0;
+            });
+            return maxEdgeId+1;
+    });
+    sigma.classes.graph.addMethod('getLastNodeIndex', function (){
+
+        if (this.nodesArray.length > 0){
+        let lastNodeID = this.nodesArray[this.nodesArray.length-1].id;
+        return Number.parseInt(lastNodeID.substr(1))+1;
+            }
+        return 0;
+    });
+	sigma.classes.graph.addMethod('getEdgesByNodeId', function(nId){
+        let edges = this.edgesArray.filter(function (edge){
+               return edge.source === nId;
+            });
+        edges = edges.concat(story.endings.filter(function (edge){
+                return edge.source === nId;
+            }));
+        return edges;
         });
-        graph = new sigma({
-            graph: story,
+    sigma.classes.graph.addMethod('getNumOfOutNighbors', function (srcId, tarId = srcId){
+        let x = this.outNeighborsIndex[srcId][tarId], count = 1;
+        for (let edge in x){
+            count++;
+        }
+        return count; 
+    });
+    graph = new sigma({
+        graph: story,
+        container: gcontainer,
+        settings: {
+            defaultNodeColor: "#ec5148",
+            defaultLabelSize: 11,
+            doubleClickEnabled: false,
+            immutable: false,
+            minEdgeSize: 2
+        },
+        renderer: {
             container: gcontainer,
-            settings: {
-                defaultNodeColor: "#ec5148",
-                defaultLabelSize: 11,
-                doubleClickEnabled: false,
-                immutable: false,
-                minEdgeSize: 2
+            type: "canvas"
+        }
+
+    });
+    var dragListener = sigma.plugins.dragNodes(graph, graph.renderers[0]);
+
+    graph.bind('doubleClickStage', function (e){
+        console.log(graph.graph.nodes());
+        let n = graph.graph.getLastNodeIndex(),
+            event = {
+                Event_id:n,
+                Event_title:'',
+                Event_Content:''
             },
-            renderer: {
-                container: gcontainer,
-                type: "canvas"
-            }
-            
-        });
-        
-        console.log(JSON.stringify(new Story(graph.graph)));
-        createInfoBox(icontainer);
-        var dragListener = sigma.plugins.dragNodes(graph, graph.renderers[0]);
-
-        graph.bind('doubleClickStage', function (e){
-            let n = graph.graph.getLastNodeIndex()+1;
-            console.log(n);
-            graph.graph.addNode({
-                id: 'n' + n,
-                size: 10,
-                x: (n+1) / n,
-                y: 0,
-                label: '',
-                content: ''
-            });
-            graph.refresh();
-        });
-    },
-    
-    createInfoBox = function (icontainer){
-        
-        var nodeInfoForm, nLabel, nodeLabel, targets, ctaLabel, contentArea, saveBtn;
-        nodeInfoForm = document.createElement("form");
-        nLabel = document.createElement("span");
-        nodeLabel = document.createElement("input");
-        targets = document.createElement("div");
-        ctaLabel = document.createElement("span");
-        contentArea = document.createElement("textarea");
-        saveBtn = document.getElementById("saveBtn");
-        
-        saveBtn.addEventListener('click', function (e){
-            let url = window.location.protocol + "//" + window.location.host + "/save_story"
-            let story = graph.graph;
-            let json = new Story(story);
-            let params = "json="+JSON.stringify(json);
-            params = params + "&id="+story_id;
-            httpPostAsync(url, params);
-        });
-        
-        nLabel.innerHTML = "Node Label";
-        nodeLabel.type = "text";
-        
-        targets.name = "targets";
-        targets.id = "nodeTaregets";
-        targets.style = "display:flex; flex-flow: column; ";
-        
-        ctaLabel.innerHTML = "Content of Node";
-        contentArea.style.width = "100%";
-        
-        nodeInfoForm.appendChild(nLabel);
-        nodeInfoForm.appendChild(nodeLabel);
-        nodeInfoForm.appendChild(targets);
-        nodeInfoForm.appendChild(ctaLabel);
-        nodeInfoForm.appendChild(contentArea);
-    
-        icontainer.appendChild(nodeInfoForm);
-        
-        graph.bind('clickNode', function(e) {
-            node = e.data.node;
-            nodeInfoForm.id = node.id;
-            nodeLabel.value = node.label;
-            setTargets(targets, node);
-            nodeLabel.addEventListener('change', function(e){
-                node.label = nodeLabel.value;
-                updateOptions();
-                graph.refresh();
-            });
-            let story = graph.graph;
-            
-            contentArea.value = node.content;
-            contentArea.addEventListener('change', function(e){
-                node.content = contentArea.value;
-                graph.refresh();
-            });
-        });
-        graph.bind('doubleClickNode', function (e){
-            graph.graph = graph.graph.dropNode(e.data.node.id);
-            graph.refresh();
-        });
-        
-    };
-
-    function setTargets(cont, node) {
-        var choiceDiv, tChoices = [], tNode, sChoice, cLabel, sLabel, removeBtn, addBtn, addChoice, endBox, endSpan, Nodes, Edges;
-        
-        Nodes = graph.graph.nodes;
-        Edges = graph.graph.edges;
-        
-        while(cont.firstChild){
-            cont.removeChild(cont.firstChild);
-        }
-        Edges().forEach(function (edge){
-            if(edge.source === node.id){
-                createChoiceElements();
-                tNode.value = Nodes(edge.target).id;
-                tNode.name = edge.id;
-                changeEdges(tNode);
-                
-                sChoice.value = edge.choice;
-                sChoice.name = edge.id;
-                changeChoice(sChoice);
-                appendChoiceElements();
-            }
-            });
-        story.endings.forEach(function (edge){
-            if(edge.source === node.id){
-                let Es = story.endings;
-                createChoiceElements();
-                tNode.value = edge.target || '';
-                tNode.name = edge.id;
-                changeEdges(tNode);
-                tNode.disabled = true;
-                endBox.checked = true;
-                sChoice.value = edge.choice || '';
-                sChoice.name = edge.id || '';
-                changeChoice(sChoice);
-                appendChoiceElements();
-                }
-            });
-        updateOptions();
-        
-        addBtn = document.createElement("div");
-        addBtn.innerHTML = "+";
-        addBtn.style = "color: green;";
-        addBtn.addEventListener('click', function (e){
-            createChoiceElements();
-            tNode.value = '';
-            changeEdges(tNode);
-            appendChoiceElements();
-            cont.insertBefore(cont.lastChild, addBtn);
-            updateOptions();
-        });
-        cont.appendChild(addBtn);
-        
-        function createChoiceElements(){
-            choiceDiv = document.createElement("div");
-            choiceDiv.style = "display: flex; flex-flow: row;";
-
-            cLabel = document.createElement("span");
-            cLabel.innerHTML = "Choice";
-
-            sLabel = document.createElement("span");
-            sLabel.innerHTML = "Choice lead to";
-
-            tNode = document.createElement("select");
-            tNode.class = "tNodes";
-            
-            tChoices.forEach(function (o){
-                var op = o.cloneNode(true);
-                tNode.add(op);
-            });
-            
-            sChoice = document.createElement("input");
-            sChoice.type = "text";
-            
-            endBox = document.createElement("input");
-            endBox.type = "checkbox";
-            
-            endSpan = document.createElement("span");
-            endSpan.innerHTML = "is this an Ending Choice";
-            
-            endBox.addEventListener('change', function (e){
-                var selE = e.target.parentElement.getElementsByTagName("select")[0],
-                    id = selE.name;
-                if(e.target.checked){
-                    let edge = Edges(id) || new Edge(Edges().length);
-                    if(Edges(id)){graph.graph.dropEdge(id);}
-                    let n = story.endings.length;
-                    edge.id = '-' + (edge.id || 'e' + n);
-                    edge.source = selE.parentElement.parentElement.parentElement.id;
-                    edge.target = '-1';
-                    edge.end = true;
-                    story.endings.push(edge);
-                    selE.disabled = true;
-                    selE.name = edge.id;
-                }
-                else{
-                    let restoredEdge = story.getHedge(id);
-                    let lastEdgeIndex = graph.graph.getLastEdgeInedx()+1;
-                    restoredEdge.id = 'e' + lastEdgeIndex;
-                    restoredEdge.target = restoredEdge.source;
-                    restoredEdge.end = undefined;
-                    graph.graph.addEdge(restoredEdge);
-                    selE.name = restoredEdge.id;
-                    selE.disabled = false;
-                    story.removeHedge(restoredEdge.id);
-                }
-                graph.refresh();
-                setTargets(cont, node);
-            });
-            removeBtn = document.createElement("span");
-            removeBtn.innerHTML = "X";
-            removeBtn.style = "color: red; background-color: black;";
-            removeBtn.addEventListener("click", function(e){
-                var eID = e.target.parentElement.getElementsByTagName("select")[0].name;
-                if(Edges(eID)){
-                    graph.graph.dropEdge(eID);
-                }
-                else{
-                    story.removeHedge(eID);    
-                }
-                cont.removeChild(this.parentElement);
-                graph.refresh();
-            });
-            console.log(story.endings);
-        }
-        
-        function appendChoiceElements(){
-            choiceDiv.appendChild(cLabel);
-            choiceDiv.appendChild(sChoice);
-            choiceDiv.appendChild(sLabel);
-            choiceDiv.appendChild(tNode);
-            choiceDiv.appendChild(endSpan);
-            choiceDiv.appendChild(endBox);
-            choiceDiv.appendChild(removeBtn);
-            cont.appendChild(choiceDiv);
-        }
-        function changeEdges(selected){
-                 tNode.addEventListener('change', function (e){
-                    var oldEdge, newEdge, lastEdgeInedx;
-                    lastEdgeInedx = graph.graph.getLastEdgeInedx()+1;
-                    oldEdge = Edges(selected.name) || new Edge(0);
-                    newEdge = new Edge(lastEdgeInedx);
-                    newEdge.id = 'e' + lastEdgeInedx;
-                    newEdge.choice = oldEdge.choice || e.target.parentElement.getElementsByTagName("input")[0].value;
-                    newEdge.count = oldEdge.count || 3;
-                    newEdge.end = oldEdge.end;
-                    newEdge.type = oldEdge.type || "curvedArrow";
-                    newEdge.source = e.target.parentElement.parentElement.parentElement.id || '';
-                    newEdge.target = selected.value || '-1';
-                    selected.name = newEdge.id;
-                    
-                    console.log("new|old:")
-                    console.log(selected);
-                    console.log(newEdge);
-                    console.log(oldEdge);
-
-                    if(Edges(oldEdge.id)){graph.graph = graph.graph.dropEdge(oldEdge.id);}
-                    graph.graph = graph.graph.addEdge(newEdge);
-                    updateOptions();
-                    graph.refresh();
-                });
-        }
-        function changeChoice(choice){
-            choice.addEventListener('change',function (e){
-                var E = Edges(e.target.parentElement.getElementsByTagName("select")[0].name);
-                if(E){ E.choice = e.srcElement.value;}
-                graph.refresh();
-            });
-        }
-
+            index = n+1;
+        n = ((n===0)? 1 : n);
+        graph.graph.addNode(new Node(event, index, n));
+        graph.refresh();
+    });
+    graph.bind('doubleClickNode', function (e){
+        graph.graph.dropNode(e.data.node.id);
+        ibox.emptyContainer(ibox.parent);
+        graph.refresh();
+    });
+    graph.bind('clickNode', function(e) {
+        let node = e.data.node;
+        ibox = new InfoBox(node, icontainer);
+    });
+	document.addEventListener('unload', function(e){
+		save()
+	});
+    document.getElementById("saveBtn").addEventListener('click', function (e){
+        save();
+     });
+};
+function save(){
+    let url = window.location.protocol + "//" + window.location.host + "/save_story",
+        story = graph.graph,
+        json = new Story(story),
+        params = "json="+JSON.stringify(json);
+    params = params + "&id="+story_id;
+    httpPostAsync(url, params);
 }
-        function updateOptions(){
-            let Choices = [];
-            let opB = document.createElement("option");
-            opB.text = '...';
-            opB.value = '-1';
-            Choices.push(opB);
-            graph.graph.nodes().forEach(function (n, i){
-            let op = document.createElement("option");
-            op.text = n.label;
-            op.value = n.id;
-            Choices.push(op);
-        });
-            let selects = document.getElementsByTagName("select");
-            
-            for (let i = 0; i< selects.length ; i++){
-                while(selects[i].firstChild){
-                    selects[i].removeChild(selects[i].firstChild);
-                }
-            }
-            if(selects.length>0){
-            for (let i = 0; i < selects.length; i++){
-                let edge = graph.graph.edges(selects[i].name);
-                
-                let selectedVal ='-1';
-                if(edge){selectedVal = edge.target};
-                Choices.forEach(function (o, x){
-                    let op = o.cloneNode(true);
-                    selects[i].appendChild(op, x);
-                    if (op.value === selectedVal) {
-                        selects[i].selectedIndex = x;
-                    }
-                });
-            }
-        }
-    }
-
 function httpPostAsync(url, params, callback=nullFallback) {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
@@ -365,3 +122,4 @@ function nullFallback(status, responseText) {
     console.log("response status: " + status);
     console.log("response text: " + responseText);
 }
+

@@ -19,6 +19,36 @@ class Edge {
     this.type = "curvedArrow";
     this.count = jndex;
 	}
+    static generateEmptyEdge(nodeId){
+        let branch = {
+            choice:'',
+            Next_event:nodeId.substr(1)
+        },
+        srcId = nodeId.substr(1),
+        edgeSerial = graph.graph.getLastEdgeInedx(),
+        jndex = graph.graph.getNumOfOutNighbors(nodeId);
+        return new Edge(branch, srcId, edgeSerial, jndex);
+    }
+    static generateArgsFromEdge(edge){
+        let branch = {
+            choice:edge.choice,
+            Next_event:edge.source.substr(1)
+        },
+        srcId = edge.source.substr(1),
+        edgeSerial = edge.id.substr(1),
+        jndex = edge.count;
+        return [branch, srcId, edgeSerial, jndex];
+    }
+    static generateFromHEdge(edge){
+        let newEdge = {};
+        for (let prop in edge){
+            newEdge[prop] = edge[prop];
+        }
+        delete newEdge.end;
+        newEdge.target = newEdge.source;
+        newEdge.id = newEdge.id.substr(1);
+        return newEdge;
+    }
 }
 class HEdge extends Edge{
 	constructor(branch, srcId, edgeSerial, jndex){
@@ -26,10 +56,13 @@ class HEdge extends Edge{
 		this.id = '-' + this.id;
 		this.end = true;
 	}
+    static generateFromEdge(edge){
+        let args = this.generateArgsFromEdge(edge);
+        return new HEdge(args[0], args[1], args[2], args[3]);
+    }
 }
 function constructGraph(events) {
     "use strict";
-    console.log(events);
     let graph = {}, nodes = [], Hedges = [], Redges = [];
 
     if (events)
@@ -61,7 +94,6 @@ class SigmaLayout {
 	s.Events = s.Events || "";
 	//if(s.hasOwnProperty('Events')){
 	let graph = constructGraph(s.Events);
-	console.log(graph);
     this.nodes = graph.nodes;
     this.edges = graph.edges;
     this.endings = graph.Hedges;
