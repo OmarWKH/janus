@@ -14,7 +14,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='sigmaGraph.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='sigma_layout.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='json_layout.js') }}"></script>
-
+	<script type="text/javascript" src="{{ url_for('static', filename='ui_logic.js') }}"></script>
     <script type="text/javascript">
         window.addEventListener("load", function(){
             init({{ story._id|e }}, {{ story.json|tojson }}, 'graph', 'infoBox');
