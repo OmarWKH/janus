@@ -8,7 +8,11 @@
     <script type="text/javascript">
     	player({{ story._id }}, {{ story.json|tojson }}, {{ save|tojson }});
     </script>
+    <!-- disabled because it created a cookie '__sharethis_cookie_test__' which invalidates the session.
+        The cookie with sharethis: '__sharethis_cookie_test__; session': 'session_value'
+        Without (valid): 'session': 'session_value'
     <script type="text/javascript" src="//platform-api.sharethis.com/js/sharethis.js#property=592ad1289f0427001183fe70&product=inline-share-buttons"></script>
+    -->
 {% endblock %}
 
 {% block body %}
