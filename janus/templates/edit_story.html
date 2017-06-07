@@ -1,9 +1,3 @@
-<!--
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
--->
 {% extends 'layout.html' %}
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='edit_story.css') }}">
@@ -23,12 +17,13 @@
 {% endblock %}
 {% block body %}
     <main>
+    <p id="help">Double click within area to add/remove node. Click on node to edit it.</p>
+    <div id="controls">
+        <button id="saveBtn">Save</button>
+    </div>
     <div id="graph">
     </div>
     <div id="infoBox">
-    </div>
-    <div id="controls">
-        <button id="saveBtn">Save</button>
     </div>
     </main>
 {% endblock %}

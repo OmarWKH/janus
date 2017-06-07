@@ -7,7 +7,7 @@ main {
 }
 #graph {
     flex: 1;
-    flex-grow: 
+    border: 1px dotted red;
 }
 #infoBox {
     flex: 1;

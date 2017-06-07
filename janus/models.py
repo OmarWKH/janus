@@ -21,7 +21,7 @@ class Story(db.Model):
 	published = db.Column(db.Boolean(), default=False, nullable=False)
 	image_name = db.Column(db.String(), default='default.jpeg')
 	create_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-	json = db.Column(db.Text)
+	json = db.Column(db.Text, default='{ \"Events\" : [] }')
 
 	author = db.relationship('User', backref=db.backref(
 		'creations',

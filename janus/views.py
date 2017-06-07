@@ -27,8 +27,7 @@ def create_story():
 		author = current_user
 		title = request.form['title']
 		published = 'published' in request.form
-		json = request.form['story_json'] # to be removed, json creation is not done here
-
+		
 		image_name = 'default.jpeg'
 		if 'image' in request.files:
 			image = request.files['image']
@@ -39,11 +38,11 @@ def create_story():
 				image.save(os.path.join(image_folder, image_name))
 				image.close()
 		
-		new_story = Story(author=author, title=title, published=published, image_name=image_name, json=json)
+		new_story = Story(author=author, title=title, published=published, image_name=image_name)
 		db.session.add(new_story)
 		db.session.commit()
 		flash("Created story")
-		return redirect(url_for('list_stories'))
+		return redirect(url_for('edit_story', _id=new_story._id))
 	
 	action = url_for('create_story')
 	return render_template('create.html', story=None, checked='')
@@ -53,19 +52,16 @@ def create_story():
 def edit_story_info(_id):
 	if request.method == 'POST':
 		story = Story.query.get_or_404(_id)
-
 		if story.author != current_user:
 			abort(404)
 
 		story.title = request.form['title']
 		story.published = 'published' in request.form
-		story.json = request.form['story_json'] # to be removed, json creation is not done here
 
 		db.session.add(story)
 		db.session.commit()
 		flash("Edited story info")
-		# return redirect(url_for('edit_story', _id=story._id))
-		return redirect(url_for('list_stories'))
+		return redirect(url_for('profile', username=current_user.username))
 	elif request.method	== 'GET':
 		story = Story.query.get_or_404(_id)
 		checked = ''
@@ -87,7 +83,6 @@ def edit_story(_id):
 def save_story():
 	story_id = request.values['id']
 	story_json = request.values['json']
-	print(story_id, story_json)
 	story = Story.query.get_or_404(story_id)
 	if story.author == current_user:
 		story.json = story_json
