@@ -24,12 +24,16 @@
 	{% block head %}{%endblock%}
 </head>
 <body>
+
     <!-- Sidebar/menu -->
     <nav class="w3-sidebar w3-red w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;" id="mySidebar"><br>
         <a href="javascript:void(0)" onclick="w3_close()" class="w3-button w3-hide-large w3-display-topleft" style="width:100%;font-size:22px">Close Menu</a>
         <div class="w3-container w3-padding-64">
             <h3><b>Janus</b></h3>
             <sub>The home of text-based RPGs</sub>
+        </div>
+        <div class="w3-bar w3-yellow">
+            <div class="w3-bar-item">Janus is still under development</div>
         </div>
         <div class="w3-bar-block">
             <a href="{{ url_for('list_stories')}}" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
